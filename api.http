@@ -1,0 +1,7 @@
+POST http://localhost:3000
+content-type: application/json
+
+{
+    "username": "username",
+    "token": "github_pat_xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+}
