@@ -1,63 +1,36 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Descrição
+## Getting Started
 
-Este projeto é uma aplicação construída com o framework [NestJS](https://nestjs.com) que permite deixar de seguir usuários no GitHub que não seguem de volta. A aplicação utiliza a API do GitHub para buscar a lista de usuários que você está seguindo e a lista de seus seguidores, e então deixa de seguir aqueles que não te seguem de volta.
-
-## Configuração do Projeto
+First, run the development server:
 
 ```bash
-$ npm install
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-## Compilar e executar o projeto
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-```bash
-# desenvolvimento
-$ npm run start
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-# modo watch
-$ npm run start:dev
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-# modo produção
-$ npm run start:prod
-```
+## Learn More
 
-## Executar testes
+To learn more about Next.js, take a look at the following resources:
 
-```bash
-# testes unitários
-$ npm run test
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-# testes e2e
-$ npm run test:e2e
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-# cobertura de testes
-$ npm run test:cov
-```
+## Deploy on Vercel
 
-## Recursos
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-- [Documentação do NestJS](https://docs.nestjs.com)
-- [Canal do Discord](https://discord.gg/G7Qnnhy)
-- [Cursos oficiais](https://courses.nestjs.com)
-- [Devtools do NestJS](https://devtools.nestjs.com)
-- [Suporte empresarial](https://enterprise.nestjs.com)
-- Siga-nos no [X](https://x.com/nestframework) e [LinkedIn](https://linkedin.com/company/nestjs)
-- [Jobs board](https://jobs.nestjs.com)
-
-## Suporte
-
-Nest é um projeto open source licenciado sob MIT. Ele cresce graças aos patrocinadores e ao suporte dos incríveis backers. Se você gostaria de se juntar a eles, por favor [leia mais aqui](https://docs.nestjs.com/support).
-
-## Mantenha contato
-
-- Autor - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## Licença
-
-Nest é licenciado sob [MIT](https://github.com/nestjs/nest/blob/master/LICENSE).
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
