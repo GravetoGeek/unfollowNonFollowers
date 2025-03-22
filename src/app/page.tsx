@@ -241,7 +241,7 @@ interface UserCardProps {
  * @component UserCard
  * Displays information about a user and provides actions to follow or unfollow.
  */
-const UserCard: React.FC<UserCardProps>=({
+const UserCard: React.FC<UserCardProps & { language: "pt" | "en" | "zh" | "hi" | "ar" | "ja" }> = ({
     user,
     onUnfollow,
     onFollow,
@@ -249,33 +249,128 @@ const UserCard: React.FC<UserCardProps>=({
     isFollowing,
     hasUnfollowed,
     isCurrentlyFollowing,
+    language, // Recebe o idioma como propriedade
 }) => {
     return (
         <li className={styles.listItem}>
             <Image src={user.avatar_url} alt={user.login} width={50} height={50} className={styles.avatar} />
             <a href={`https://github.com/${user.login}`} target="_blank" rel="noopener noreferrer">{user.login}</a>
-            {!isCurrentlyFollowing&&!hasUnfollowed&&(
+            {!isCurrentlyFollowing && !hasUnfollowed && (
                 <button
                     onClick={() => onFollow(user.login)}
                     className={styles.button}
                     disabled={isFollowing}
                 >
-                    {isFollowing? "Seguindo...":"Seguir"}
+                    {isFollowing ? translations[language].following : translations[language].follow}
                 </button>
             )}
-            {isCurrentlyFollowing&&!hasUnfollowed&&(
+            {isCurrentlyFollowing && !hasUnfollowed && (
                 <button
                     onClick={() => onUnfollow(user.login)}
                     className={styles.button}
                     disabled={isUnfollowing}
                 >
-                    {isUnfollowing? "Deixando de seguir...":"Parar de seguir"}
+                    {isUnfollowing ? translations[language].unfollowing : translations[language].unfollow}
                 </button>
             )}
-            {hasUnfollowed&&<span>Deixou de seguir</span>}
-            {isCurrentlyFollowing&&!hasUnfollowed&&<span>Seguindo</span>}
+            {hasUnfollowed && <span>{translations[language].unfollowed}</span>}
+            {isCurrentlyFollowing && !hasUnfollowed && <span>{translations[language].following}</span>}
         </li>
     )
+}
+
+// Traduções para os idiomas suportados
+const translations={
+    pt: {
+        githubUsername: "Nome de usuário do GitHub",
+        githubApiKey: "Chave da API do GitHub",
+        getApiKey: "Obtenha sua chave da API",
+        search: "Buscar",
+        searching: "Buscando...",
+        nonFollowers: "Usuários que você segue e não te seguem:",
+        nonFollowing: "Usuários que te seguem e você não segue:",
+        noUsersFound: "Nenhum usuário encontrado.",
+        unfollowing: "Deixando de seguir...",
+        follow: "Seguir",
+        following: "Seguindo...",
+        unfollow: "Parar de seguir",
+        unfollowed: "Deixou de seguir",
+    },
+    en: {
+        githubUsername: "GitHub Username",
+        githubApiKey: "GitHub API Key",
+        getApiKey: "Get your API key",
+        search: "Search",
+        searching: "Searching...",
+        nonFollowers: "Users you follow who don't follow you:",
+        nonFollowing: "Users who follow you but you don't follow back:",
+        noUsersFound: "No users found.",
+        unfollowing: "Unfollowing...",
+        follow: "Follow",
+        following: "Following...",
+        unfollow: "Unfollow",
+        unfollowed: "Unfollowed",
+    },
+    zh: {
+        githubUsername: "GitHub 用户名",
+        githubApiKey: "GitHub API 密钥",
+        getApiKey: "获取您的 API 密钥",
+        search: "搜索",
+        searching: "搜索中...",
+        nonFollowers: "您关注但未关注您的用户：",
+        nonFollowing: "关注您的用户但您未关注：",
+        noUsersFound: "未找到用户。",
+        unfollowing: "取消关注中...",
+        follow: "关注",
+        following: "关注中...",
+        unfollow: "取消关注",
+        unfollowed: "已取消关注",
+    },
+    hi: {
+        githubUsername: "GitHub उपयोगकर्ता नाम",
+        githubApiKey: "GitHub API कुंजी",
+        getApiKey: "अपनी API कुंजी प्राप्त करें",
+        search: "खोजें",
+        searching: "खोज जारी है...",
+        nonFollowers: "वे उपयोगकर्ता जिन्हें आप फॉलो करते हैं लेकिन वे आपको फॉलो नहीं करते:",
+        nonFollowing: "वे उपयोगकर्ता जो आपको फॉलो करते हैं लेकिन आप उन्हें फॉलो नहीं करते:",
+        noUsersFound: "कोई उपयोगकर्ता नहीं मिला।",
+        unfollowing: "अनफॉलो कर रहे हैं...",
+        follow: "फॉलो करें",
+        following: "फॉलो कर रहे हैं...",
+        unfollow: "अनफॉलो करें",
+        unfollowed: "अनफॉलो किया गया",
+    },
+    ar: {
+        githubUsername: "اسم مستخدم GitHub",
+        githubApiKey: "مفتاح API الخاص بـ GitHub",
+        getApiKey: "احصل على مفتاح API الخاص بك",
+        search: "بحث",
+        searching: "جارٍ البحث...",
+        nonFollowers: "المستخدمون الذين تتابعهم ولا يتابعونك:",
+        nonFollowing: "المستخدمون الذين يتابعونك ولا تتابعهم:",
+        noUsersFound: "لم يتم العثور على مستخدمين.",
+        unfollowing: "إلغاء المتابعة...",
+        follow: "متابعة",
+        following: "جارٍ المتابعة...",
+        unfollow: "إلغاء المتابعة",
+        unfollowed: "تم إلغاء المتابعة",
+    },
+    ja: {
+        githubUsername: "GitHub ユーザー名",
+        githubApiKey: "GitHub API キー",
+        getApiKey: "API キーを取得",
+        search: "検索",
+        searching: "検索中...",
+        nonFollowers: "フォローしているがフォローされていないユーザー:",
+        nonFollowing: "フォローされているがフォローしていないユーザー:",
+        noUsersFound: "ユーザーが見つかりません。",
+        unfollowing: "フォロー解除中...",
+        follow: "フォロー",
+        following: "フォロー中...",
+        unfollow: "フォロー解除",
+        unfollowed: "フォロー解除済み",
+    },
 }
 
 /**
@@ -292,28 +387,29 @@ export default function HomePage() {
     const [isSearching,setIsSearching]=useState(false)
     const [isUnfollowingUser,setIsUnfollowingUser]=useState("")
     const [isFollowingUser,setIsFollowingUser]=useState("")
+    const [language,setLanguage]=useState<"pt"|"en"|"zh"|"hi"|"ar"|"ja">("pt") // Idioma padrão: Português
     const [githubService]=useState<GitHubService>(() => new GitHubServiceImpl())
 
     // Carregar a chave da API do localStorage ao inicializar
     useEffect(() => {
-        const storedApiKey = localStorage.getItem("githubApiKey");
-        if (storedApiKey) {
-            setApiKey(storedApiKey);
+        const storedApiKey=localStorage.getItem("githubApiKey")
+        if(storedApiKey) {
+            setApiKey(storedApiKey)
         }
-    }, []);
+    },[])
 
     // Atualizar o localStorage sempre que a chave da API mudar
     useEffect(() => {
-        if (apiKey) {
-            localStorage.setItem("githubApiKey", apiKey);
+        if(apiKey) {
+            localStorage.setItem("githubApiKey",apiKey)
         }
-    }, [apiKey]);
+    },[apiKey])
 
     // Função para limpar a chave da API
-    const handleClearApiKey = () => {
-        setApiKey("");
-        localStorage.removeItem("githubApiKey");
-    };
+    const handleClearApiKey=() => {
+        setApiKey("")
+        localStorage.removeItem("githubApiKey")
+    }
 
     /**
      * @async
@@ -415,9 +511,21 @@ export default function HomePage() {
         <div className={styles.page}>
             <main className={styles.main}>
                 <div className={styles.ctas}>
+                    <select
+                        value={language}
+                        onChange={(e) => setLanguage(e.target.value as "pt" | "en" | "zh" | "hi" | "ar" | "ja")}
+                        className={styles.input}
+                    >
+                        <option value="pt">Português</option>
+                        <option value="en">English</option>
+                        <option value="zh">中文</option>
+                        <option value="hi">हिन्दी</option>
+                        <option value="ar">العربية</option>
+                        <option value="ja">日本語</option>
+                    </select>
                     <input
                         type="text"
-                        placeholder="GitHub Username"
+                        placeholder={translations[language].githubUsername}
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         className={styles.input}
@@ -425,7 +533,7 @@ export default function HomePage() {
                     <div className={styles.inputGroup}>
                         <input
                             type="text"
-                            placeholder="GitHub API Key"
+                            placeholder={translations[language].githubApiKey}
                             value={apiKey}
                             onChange={(e) => setApiKey(e.target.value)}
                             className={styles.input}
@@ -442,33 +550,36 @@ export default function HomePage() {
                         target="_blank"
                         rel="noreferrer"
                     >
-                        Obtenha sua chave da API
+                        {translations[language].getApiKey}
                     </a>
                     <br />
                     <button onClick={handleSearchNonFollowers} className={styles.button} disabled={isSearching}>
-                        {isSearching ? "Buscando..." : "Buscar"}
+                        {isSearching ? translations[language].searching : translations[language].search}
                     </button>
                 </div>
 
-                <h2>Usuários que você segue e não te seguem:</h2>
+                <h2>{translations[language].nonFollowers}</h2>
                 <ul className={styles.list}>
                     {nonFollowers.map((user) => (
                         <UserCard
                             key={user.login}
                             user={user}
                             onUnfollow={handleUnfollow}
-                            onFollow={() => {}} // Follow action is not relevant here
-                            isUnfollowing={isUnfollowingUser===user.login}
-                            isFollowing={false}
+                            onFollow={handleFollow}
+                            isUnfollowing={isUnfollowingUser === user.login}
+                            isFollowing={isFollowingUser === user.login}
                             hasUnfollowed={unfollowedUsers.includes(user.login)}
-                            isCurrentlyFollowing={false}
+                            isCurrentlyFollowing={followingUsers.includes(user.login)}
+                            language={language} // Passa o idioma selecionado
                         />
                     ))}
-                    {nonFollowers.length===0&&!isSearching&&<li className={styles.listItem}>Nenhum usuário encontrado.</li>}
-                    {isSearching&&<li className={styles.listItem}>Buscando usuários...</li>}
+                    {nonFollowers.length === 0 && !isSearching && (
+                        <li className={styles.listItem}>{translations[language].noUsersFound}</li>
+                    )}
+                    {isSearching && <li className={styles.listItem}>{translations[language].searching}</li>}
                 </ul>
 
-                <h2>Usuários que te seguem e você não segue:</h2>
+                <h2>{translations[language].nonFollowing}</h2>
                 <ul className={styles.list}>
                     {nonFollowing.map((user) => (
                         <UserCard
@@ -477,13 +588,16 @@ export default function HomePage() {
                             onUnfollow={() => {}} // Unfollow action is not relevant here
                             onFollow={handleFollow}
                             isUnfollowing={false}
-                            isFollowing={isFollowingUser===user.login}
+                            isFollowing={isFollowingUser === user.login}
                             hasUnfollowed={false}
                             isCurrentlyFollowing={followingUsers.includes(user.login)}
+                            language={language} // Passa o idioma selecionado
                         />
                     ))}
-                    {nonFollowing.length===0&&!isSearching&&<li className={styles.listItem}>Nenhum usuário encontrado.</li>}
-                    {isSearching&&<li className={styles.listItem}>Buscando usuários...</li>}
+                    {nonFollowing.length === 0 && !isSearching && (
+                        <li className={styles.listItem}>{translations[language].noUsersFound}</li>
+                    )}
+                    {isSearching && <li className={styles.listItem}>{translations[language].searching}</li>}
                 </ul>
             </main>
         </div>
