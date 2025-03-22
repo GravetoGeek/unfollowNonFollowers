@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import {useState} from "react"
+import {useEffect,useState} from "react"
 import styles from "./page.module.css"
 
 /**
@@ -294,6 +294,27 @@ export default function HomePage() {
     const [isFollowingUser,setIsFollowingUser]=useState("")
     const [githubService]=useState<GitHubService>(() => new GitHubServiceImpl())
 
+    // Carregar a chave da API do localStorage ao inicializar
+    useEffect(() => {
+        const storedApiKey = localStorage.getItem("githubApiKey");
+        if (storedApiKey) {
+            setApiKey(storedApiKey);
+        }
+    }, []);
+
+    // Atualizar o localStorage sempre que a chave da API mudar
+    useEffect(() => {
+        if (apiKey) {
+            localStorage.setItem("githubApiKey", apiKey);
+        }
+    }, [apiKey]);
+
+    // Função para limpar a chave da API
+    const handleClearApiKey = () => {
+        setApiKey("");
+        localStorage.removeItem("githubApiKey");
+    };
+
     /**
      * @async
      * @function handleSearchNonFollowers
@@ -376,8 +397,7 @@ export default function HomePage() {
             const success=await githubService.followUser(userLogin,apiKey)
             if(success) {
                 setFollowingUsers((prev) => [...prev,userLogin])
-                // Optionally, refresh the non-following list
-                // await handleSearchNonFollowers();
+                setNonFollowing((prev) => prev.filter((u) => u.login!==userLogin)) // Remove o usuário da lista
             }
         } catch(error) {
             console.error(`Erro ao seguir ${userLogin}:`,error)
@@ -402,13 +422,21 @@ export default function HomePage() {
                         onChange={(e) => setUsername(e.target.value)}
                         className={styles.input}
                     />
-                    <input
-                        type="text"
-                        placeholder="GitHub API Key"
-                        value={apiKey}
-                        onChange={(e) => setApiKey(e.target.value)}
-                        className={styles.input}
-                    />
+                    <div className={styles.inputGroup}>
+                        <input
+                            type="text"
+                            placeholder="GitHub API Key"
+                            value={apiKey}
+                            onChange={(e) => setApiKey(e.target.value)}
+                            className={styles.input}
+                        />
+                        <button
+                            onClick={handleClearApiKey}
+                            className={styles.clearButton}
+                        >
+                            ✕
+                        </button>
+                    </div>
                     <a
                         href={`https://github.com/settings/personal-access-tokens`}
                         target="_blank"
@@ -418,7 +446,7 @@ export default function HomePage() {
                     </a>
                     <br />
                     <button onClick={handleSearchNonFollowers} className={styles.button} disabled={isSearching}>
-                        {isSearching? "Buscando...":"Buscar"}
+                        {isSearching ? "Buscando..." : "Buscar"}
                     </button>
                 </div>
 
