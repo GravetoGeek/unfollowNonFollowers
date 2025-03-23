@@ -295,6 +295,10 @@ const translations={
         following: "Seguindo...",
         unfollow: "Parar de seguir",
         unfollowed: "Deixou de seguir",
+        followAll: "Seguir todos",
+        unfollowAll: "Parar de seguir todos",
+        followingAll: "Seguindo todos...",
+        unfollowingAll: "Deixando de seguir todos...",
     },
     en: {
         githubUsername: "GitHub Username",
@@ -310,6 +314,10 @@ const translations={
         following: "Following...",
         unfollow: "Unfollow",
         unfollowed: "Unfollowed",
+        followAll: "Follow all",
+        unfollowAll: "Unfollow all",
+        followingAll: "Following all...",
+        unfollowingAll: "Unfollowing all...",
     },
     zh: {
         githubUsername: "GitHub 用户名",
@@ -325,6 +333,10 @@ const translations={
         following: "关注中...",
         unfollow: "取消关注",
         unfollowed: "已取消关注",
+        followAll: "关注所有",
+        unfollowAll: "取消关注所有",
+        followingAll: "正在关注所有...",
+        unfollowingAll: "正在取消关注所有...",
     },
     hi: {
         githubUsername: "GitHub उपयोगकर्ता नाम",
@@ -340,6 +352,10 @@ const translations={
         following: "फॉलो कर रहे हैं...",
         unfollow: "अनफॉलो करें",
         unfollowed: "अनफॉलो किया गया",
+        followAll: "सभी को फॉलो करें",
+        unfollowAll: "सभी को अनफॉलो करें",
+        followingAll: "सभी को फॉलो कर रहे हैं...",
+        unfollowingAll: "सभी को अनफॉलो कर रहे हैं...",
     },
     ar: {
         githubUsername: "اسم مستخدم GitHub",
@@ -355,6 +371,10 @@ const translations={
         following: "جارٍ المتابعة...",
         unfollow: "إلغاء المتابعة",
         unfollowed: "تم إلغاء المتابعة",
+        followAll: "متابعة الجميع",
+        unfollowAll: "إلغاء متابعة الجميع",
+        followingAll: "جارٍ متابعة الجميع...",
+        unfollowingAll: "جارٍ إلغاء متابعة الجميع...",
     },
     ja: {
         githubUsername: "GitHub ユーザー名",
@@ -370,6 +390,10 @@ const translations={
         following: "フォロー中...",
         unfollow: "フォロー解除",
         unfollowed: "フォロー解除済み",
+        followAll: "すべてフォロー",
+        unfollowAll: "すべてフォロー解除",
+        followingAll: "すべてフォロー中...",
+        unfollowingAll: "すべてフォロー解除中...",
     },
 }
 
@@ -390,20 +414,30 @@ export default function HomePage() {
     const [language,setLanguage]=useState<"pt"|"en"|"zh"|"hi"|"ar"|"ja">("pt") // Idioma padrão: Português
     const [githubService]=useState<GitHubService>(() => new GitHubServiceImpl())
 
-    // Carregar a chave da API do localStorage ao inicializar
+    // Carregar o nome do usuário e a chave da API do localStorage ao inicializar
     useEffect(() => {
-        const storedApiKey=localStorage.getItem("githubApiKey")
-        if(storedApiKey) {
-            setApiKey(storedApiKey)
+        const storedUsername = localStorage.getItem("githubUsername");
+        const storedApiKey = localStorage.getItem("githubApiKey");
+        if (storedUsername) {
+            setUsername(storedUsername);
         }
-    },[])
+        if (storedApiKey) {
+            setApiKey(storedApiKey);
+        }
+    }, []);
 
-    // Atualizar o localStorage sempre que a chave da API mudar
+    // Atualizar o localStorage sempre que o nome do usuário ou a chave da API mudar
     useEffect(() => {
-        if(apiKey) {
-            localStorage.setItem("githubApiKey",apiKey)
+        if (username) {
+            localStorage.setItem("githubUsername", username);
         }
-    },[apiKey])
+    }, [username]);
+
+    useEffect(() => {
+        if (apiKey) {
+            localStorage.setItem("githubApiKey", apiKey);
+        }
+    }, [apiKey]);
 
     // Função para limpar a chave da API
     const handleClearApiKey=() => {
@@ -411,37 +445,45 @@ export default function HomePage() {
         localStorage.removeItem("githubApiKey")
     }
 
+    const handleClearUsername = () => {
+        setUsername("");
+        localStorage.removeItem("githubUsername");
+    };
+
     /**
      * @async
      * @function handleSearchNonFollowers
      * Fetches the list of non-followers and users not being followed back from GitHub.
      */
-    const handleSearchNonFollowers=async () => {
-        if(!username||!apiKey) {
-            alert("Por favor, insira seu nome de usuário e chave da API do GitHub.")
-            return
+    const handleSearchNonFollowers = async () => {
+        if (!username || !apiKey) {
+            alert("Por favor, insira seu nome de usuário e chave da API do GitHub.");
+            return;
         }
 
-        setIsSearching(true)
-        setNonFollowers([])
-        setNonFollowing([])
+        setIsSearching(true);
+        setNonFollowers([]);
+        setNonFollowing([]);
 
         try {
-            const nonFollowersResult=await githubService.fetchNonFollowers(username,apiKey)
-            setNonFollowers(nonFollowersResult)
-            const nonFollowingResult=await githubService.fetchNonFollowing(username,apiKey)
-            setNonFollowing(nonFollowingResult)
-        } catch(error) {
-            console.error('Erro ao buscar não seguidores:',error)
-            if(error instanceof Error) {
-                alert(`Erro ao buscar não seguidores: ${error.message}`)
+            console.log("Buscando usuários que você segue e não te seguem...");
+            const nonFollowersResult = await githubService.fetchNonFollowers(username, apiKey);
+            setNonFollowers(nonFollowersResult);
+
+            console.log("Buscando usuários que te seguem e você não segue...");
+            const nonFollowingResult = await githubService.fetchNonFollowing(username, apiKey);
+            setNonFollowing(nonFollowingResult);
+        } catch (error) {
+            console.error("Erro ao buscar dados:", error);
+            if (error instanceof Error) {
+                alert(`Erro ao buscar dados: ${error.message}`);
             } else {
-                alert('Erro ao buscar não seguidores.')
+                alert("Erro ao buscar dados.");
             }
         } finally {
-            setIsSearching(false)
+            setIsSearching(false);
         }
-    }
+    };
 
     /**
      * @async
@@ -507,6 +549,78 @@ export default function HomePage() {
         }
     }
 
+    /**
+     * @async
+     * @function handleUnfollowAll
+     * Unfollows all users in the non-followers list.
+     */
+    const handleUnfollowAll = async () => {
+        if (!apiKey) {
+            alert("Por favor, insira sua chave da API do GitHub.");
+            return;
+        }
+
+        if (nonFollowers.length === 0) {
+            alert("Nenhum usuário para deixar de seguir.");
+            return;
+        }
+
+        const confirmUnfollow = confirm("Tem certeza de que deseja deixar de seguir todos os usuários?");
+        if (!confirmUnfollow) return;
+
+        setIsSearching(true);
+
+        try {
+            for (const user of nonFollowers) {
+                await githubService.unfollowUser(user.login, apiKey);
+                setNonFollowers((prev) => prev.filter((u) => u.login !== user.login));
+                setUnfollowedUsers((prev) => [...prev, user.login]);
+            }
+            alert("Você deixou de seguir todos os usuários.");
+        } catch (error) {
+            console.error("Erro ao deixar de seguir todos os usuários:", error);
+            alert("Ocorreu um erro ao tentar deixar de seguir todos os usuários.");
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    /**
+     * @async
+     * @function handleFollowAll
+     * Follows all users in the non-following list.
+     */
+    const handleFollowAll = async () => {
+        if (!apiKey) {
+            alert("Por favor, insira sua chave da API do GitHub.");
+            return;
+        }
+
+        if (nonFollowing.length === 0) {
+            alert("Nenhum usuário para seguir.");
+            return;
+        }
+
+        const confirmFollow = confirm("Tem certeza de que deseja seguir todos os usuários?");
+        if (!confirmFollow) return;
+
+        setIsSearching(true);
+
+        try {
+            for (const user of nonFollowing) {
+                await githubService.followUser(user.login, apiKey);
+                setNonFollowing((prev) => prev.filter((u) => u.login !== user.login));
+                setFollowingUsers((prev) => [...prev, user.login]);
+            }
+            alert("Você seguiu todos os usuários.");
+        } catch (error) {
+            console.error("Erro ao seguir todos os usuários:", error);
+            alert("Ocorreu um erro ao tentar seguir todos os usuários.");
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
     return (
         <div className={styles.page}>
             <main className={styles.main}>
@@ -523,13 +637,21 @@ export default function HomePage() {
                         <option value="ar">العربية</option>
                         <option value="ja">日本語</option>
                     </select>
-                    <input
-                        type="text"
-                        placeholder={translations[language].githubUsername}
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        className={styles.input}
-                    />
+                    <div className={styles.inputGroup}>
+                        <input
+                            type="text"
+                            placeholder={translations[language].githubUsername}
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            className={styles.input}
+                        />
+                        <button
+                            onClick={handleClearUsername}
+                            className={styles.clearButton}
+                        >
+                            ✕
+                        </button>
+                    </div>
                     <div className={styles.inputGroup}>
                         <input
                             type="text"
@@ -555,6 +677,24 @@ export default function HomePage() {
                     <br />
                     <button onClick={handleSearchNonFollowers} className={styles.button} disabled={isSearching}>
                         {isSearching ? translations[language].searching : translations[language].search}
+                    </button>
+                    <button
+                        onClick={handleUnfollowAll}
+                        className={styles.button}
+                        disabled={isUnfollowingUser !== "" || nonFollowers.length === 0}
+                    >
+                        {isUnfollowingUser !== ""
+                            ? translations[language].unfollowingAll
+                            : translations[language].unfollowAll}
+                    </button>
+                    <button
+                        onClick={handleFollowAll}
+                        className={styles.button}
+                        disabled={isFollowingUser !== "" || nonFollowing.length === 0}
+                    >
+                        {isFollowingUser !== ""
+                            ? translations[language].followingAll
+                            : translations[language].followAll}
                     </button>
                 </div>
 
