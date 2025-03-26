@@ -1,166 +1,623 @@
-"use client";
+"use client"
 
 import Image from "next/image"
-import {useState} from "react"
+import {useEffect,useState} from "react"
 import styles from "./page.module.css"
 
+/**
+ * @interface User
+ * Represents a GitHub user with their login and avatar URL.
+ */
 interface User {
-    login: string;
-    avatar_url: string;
+    login: string
+    avatar_url: string
 }
 
-export default function Home() {
-    const [username,setUsername]=useState("")
-    const [apiKey,setApiKey]=useState("")
-    const [nonFollowers, setNonFollowers] = useState<User[]>([])
-    const [nonFollowing, setNonFollowing] = useState<User[]>([])
-    const [followingUsers, setFollowingUsers] = useState<string[]>([])
-    const [unfollowedUsers, setUnfollowedUsers] = useState<string[]>([])
+/**
+ * @interface GitHubService
+ * Defines the contract for interacting with the GitHub API.
+ */
+interface GitHubService {
+    fetchAllPages<T>(url: string,token: string): Promise<T[]>
+    fetchNonFollowers(username: string,token: string): Promise<User[]>
+    fetchNonFollowing(username: string,token: string): Promise<User[]>
+    unfollowUser(usernameToUnfollow: string,token: string): Promise<boolean>
+    followUser(usernameToFollow: string,token: string): Promise<boolean>
+}
 
-    const fetchAllPages = async (url: string, token: string): Promise<User[]> => {
-        let results: User[] = [];
-        let page=1;
+/**
+ * @class GitHubServiceImpl
+ * Implements the GitHubService interface to handle API calls.
+ */
+class GitHubServiceImpl implements GitHubService {
+    private readonly baseUrl="https://api.github.com";
+
+    /**
+     * @async
+     * @method fetchAllPages
+     * Fetches data from a paginated API endpoint until all pages are retrieved.
+     * @param {string} url - The base URL of the API endpoint.
+     * @param {string} token - The GitHub API token for authorization.
+     * @returns {Promise<T[]>} - A promise that resolves to an array of data from all pages.
+     * @throws {Error} - If there is an error fetching data from any page.
+     */
+    async fetchAllPages<T>(url: string,token: string): Promise<T[]> {
+        let results: T[]=[] // Rewritten line
+        let currentPage=1
+        let hasMorePages=true
 
         try {
-            console.log('fetchAllPages')
-            let hasMorePages=true;
+            console.log('fetchAllPages - Fetching data from:',url)
             while(hasMorePages) {
-                const response=await fetch(`${url}?per_page=100&page=${page}`,{
+                const response=await fetch(`${url}?per_page=100&page=${currentPage}`,{
                     headers: {Authorization: `token ${token}`},
-                });
+                })
 
                 if(!response.ok) {
-                    throw new Error(`Erro ao buscar dados na página ${page}: ${response.status} - ${response.statusText}`);
+                    throw new Error(`Erro ao buscar dados na página ${currentPage}: ${response.status} - ${response.statusText}`)
                 }
 
-                const data=await response.json();
-                results=results.concat(data);
+                const data: T[]=await response.json()
+                results=results.concat(data)
+
                 if(data.length<100) {
-                    hasMorePages=false;
+                    hasMorePages=false
                 }
-                if(data.length<100) break;
-                page++;
+
+                currentPage++
             }
         } catch(error) {
-            if (error instanceof Error) {
-                console.error(`Erro ao buscar páginas: ${error.message}`);
+            console.error('Erro ao buscar páginas:',error)
+            if(error instanceof Error) {
+                throw new Error(`Falha ao obter dados de múltiplas páginas: ${error.message}`)
             } else {
-                console.error('Erro ao buscar páginas:', error);
+                throw new Error('Falha ao obter dados de múltiplas páginas.')
             }
-            throw new Error('Falha ao obter dados de múltiplas páginas.');
         }
 
-        return results;
+        return results
     }
 
-    const fetchNonFollowers = async (username: string, token: string): Promise<User[]> => {
+    /**
+     * @async
+     * @method fetchNonFollowers
+     * Retrieves a list of users that the authenticated user is following but are not following back.
+     * @param {string} username - The GitHub username of the authenticated user.
+     * @param {string} token - The GitHub API token for authorization.
+     * @returns {Promise<User[]>} - A promise that resolves to an array of non-followers.
+     * @throws {Error} - If there is an error fetching following or followers data.
+     */
+    async fetchNonFollowers(username: string,token: string): Promise<User[]> {
         try {
-            console.log('unfollowNonFollowers')
-            const baseUrl = "https://api.github.com";
-            const following=await fetchAllPages(
-                `${baseUrl}/users/${username}/following`,
+            console.log('fetchNonFollowers - Fetching non-followers for:',username)
+            const following=await this.fetchAllPages<User>(
+                `${this.baseUrl}/users/${username}/following`,
                 token,
-            );
+            )
 
-            const followers=await fetchAllPages(
-                `${baseUrl}/users/${username}/followers`,
+            const followers=await this.fetchAllPages<User>(
+                `${this.baseUrl}/users/${username}/followers`,
                 token,
-            );
+            )
 
-            const followersLogins=followers.map((follower) => follower.login);
+            const followersLogins=followers.map((follower) => follower.login)
 
-            const nonFollowers=following.filter(
+            const nonFollowersResult=following.filter(
                 (user) => !followersLogins.includes(user.login),
-            );
+            )
 
-            return nonFollowers;
+            return nonFollowersResult
         } catch(error) {
-            if (error instanceof Error) {
-                console.error(`Erro durante a operação de unfollow: ${error.message}`);
+            console.error('Erro ao buscar não seguidores:',error)
+            if(error instanceof Error) {
+                throw new Error(`Falha ao buscar não seguidores: ${error.message}`)
             } else {
-                console.error('Erro durante a operação de unfollow:', error);
+                throw new Error('Falha ao buscar não seguidores.')
             }
-            throw new Error('Falha ao executar a operação de unfollow.');
         }
     }
 
-    const fetchNonFollowing = async (username: string, token: string): Promise<User[]> => {
+    /**
+     * @async
+     * @method fetchNonFollowing
+     * Retrieves a list of users that are following the authenticated user but the authenticated user is not following back.
+     * @param {string} username - The GitHub username of the authenticated user.
+     * @param {string} token - The GitHub API token for authorization.
+     * @returns {Promise<User[]>} - A promise that resolves to an array of non-following users.
+     * @throws {Error} - If there is an error fetching followers or following data.
+     */
+    async fetchNonFollowing(username: string,token: string): Promise<User[]> {
         try {
-            const baseUrl = "https://api.github.com";
-            const followers=await fetchAllPages(
-                `${baseUrl}/users/${username}/followers`,
+            console.log('fetchNonFollowing - Fetching non-following for:',username)
+            const followers=await this.fetchAllPages<User>(
+                `${this.baseUrl}/users/${username}/followers`,
                 token,
-            );
+            )
 
-            const following=await fetchAllPages(
-                `${baseUrl}/users/${username}/following`,
+            const following=await this.fetchAllPages<User>(
+                `${this.baseUrl}/users/${username}/following`,
                 token,
-            );
+            )
 
-            const followingLogins=following.map((user) => user.login);
+            const followingLogins=following.map((user) => user.login)
 
-            const nonFollowing=followers.filter(
+            const nonFollowingResult=followers.filter(
                 (user) => !followingLogins.includes(user.login),
-            );
+            )
 
-            return nonFollowing;
+            return nonFollowingResult
         } catch(error) {
-            if (error instanceof Error) {
-                console.error(`Erro durante a operação de follow: ${error.message}`);
+            console.error('Erro ao buscar não seguidos:',error)
+            if(error instanceof Error) {
+                throw new Error(`Falha ao buscar não seguidos: ${error.message}`)
             } else {
-                console.error('Erro durante a operação de follow:', error);
+                throw new Error('Falha ao buscar não seguidos.')
             }
-            throw new Error('Falha ao executar a operação de follow.');
         }
     }
 
-    const handleSearchNonFollowers = async () => {
+    /**
+     * @async
+     * @method unfollowUser
+     * Unfollows a specified GitHub user.
+     * @param {string} usernameToUnfollow - The login of the user to unfollow.
+     * @param {string} token - The GitHub API token for authorization.
+     * @returns {Promise<boolean>} - A promise that resolves to true if the unfollow operation was successful.
+     * @throws {Error} - If there is an error during the unfollow operation.
+     */
+    async unfollowUser(usernameToUnfollow: string,token: string): Promise<boolean> {
         try {
-            const nonFollowers = await fetchNonFollowers(username, apiKey);
-            setNonFollowers(nonFollowers);
-            const nonFollowing = await fetchNonFollowing(username, apiKey);
-            setNonFollowing(nonFollowing);
-        } catch (error) {
-            console.error('Erro ao buscar não seguidores:', error);
-        }
-    };
-
-    const handleUnfollow = async (user: string) => {
-        try {
-            const response = await fetch(`https://api.github.com/user/following/${user}`, {
+            console.log(`unfollowUser - Unfollowing user: ${usernameToUnfollow}`)
+            const response=await fetch(`${this.baseUrl}/user/following/${usernameToUnfollow}`,{
                 method: 'DELETE',
-                headers: { Authorization: `token ${apiKey}` },
-            });
+                headers: {Authorization: `token ${token}`},
+            })
 
-            if (!response.ok) {
-                console.error(`Erro ao deixar de seguir ${user}: ${response.status} - ${response.statusText}`);
-                return;
+            if(!response.ok) {
+                console.error(`Erro ao deixar de seguir ${usernameToUnfollow}: ${response.status} - ${response.statusText}`)
+                return false
             }
 
-            setNonFollowers((prev) => prev.filter((u) => u.login !== user));
-            setUnfollowedUsers((prev) => [...prev, user]);
-            await handleSearchNonFollowers();
+            return true
+        } catch(error) {
+            console.error(`Erro ao deixar de seguir ${usernameToUnfollow}:`,error)
+            if(error instanceof Error) {
+                throw new Error(`Falha ao deixar de seguir ${usernameToUnfollow}: ${error.message}`)
+            } else {
+                throw new Error(`Falha ao deixar de seguir ${usernameToUnfollow}.`)
+            }
+        }
+    }
+
+    /**
+     * @async
+     * @method followUser
+     * Follows a specified GitHub user.
+     * @param {string} usernameToFollow - The login of the user to follow.
+     * @param {string} token - The GitHub API token for authorization.
+     * @returns {Promise<boolean>} - A promise that resolves to true if the follow operation was successful.
+     * @throws {Error} - If there is an error during the follow operation.
+     */
+    async followUser(usernameToFollow: string,token: string): Promise<boolean> {
+        try {
+            console.log(`followUser - Following user: ${usernameToFollow}`)
+            const response=await fetch(`${this.baseUrl}/user/following/${usernameToFollow}`,{
+                method: 'PUT',
+                headers: {Authorization: `token ${token}`},
+            })
+
+            if(!response.ok) {
+                console.error(`Erro ao seguir ${usernameToFollow}: ${response.status} - ${response.statusText}`)
+                return false
+            }
+
+            return true
+        } catch(error) {
+            console.error(`Erro ao seguir ${usernameToFollow}:`,error)
+            if(error instanceof Error) {
+                throw new Error(`Falha ao seguir ${usernameToFollow}: ${error.message}`)
+            } else {
+                throw new Error(`Falha ao seguir ${usernameToFollow}.`)
+            }
+        }
+    }
+}
+
+/**
+ * @interface UserCardProps
+ * Defines the properties for the UserCard component.
+ */
+interface UserCardProps {
+    user: User
+    onUnfollow: (login: string) => void
+    onFollow: (login: string) => void
+    isUnfollowing: boolean
+    isFollowing: boolean
+    hasUnfollowed: boolean
+    isCurrentlyFollowing: boolean
+}
+
+/**
+ * @component UserCard
+ * Displays information about a user and provides actions to follow or unfollow.
+ */
+const UserCard: React.FC<UserCardProps & { language: "pt" | "en" | "zh" | "hi" | "ar" | "ja" }> = ({
+    user,
+    onUnfollow,
+    onFollow,
+    isUnfollowing,
+    isFollowing,
+    hasUnfollowed,
+    isCurrentlyFollowing,
+    language, // Recebe o idioma como propriedade
+}) => {
+    return (
+        <li className={styles.listItem}>
+            <Image src={user.avatar_url} alt={user.login} width={50} height={50} className={styles.avatar} />
+            <a href={`https://github.com/${user.login}`} target="_blank" rel="noopener noreferrer">{user.login}</a>
+            {!isCurrentlyFollowing && !hasUnfollowed && (
+                <button
+                    onClick={() => onFollow(user.login)}
+                    className={styles.button}
+                    disabled={isFollowing}
+                >
+                    {isFollowing ? translations[language].following : translations[language].follow}
+                </button>
+            )}
+            {isCurrentlyFollowing && !hasUnfollowed && (
+                <button
+                    onClick={() => onUnfollow(user.login)}
+                    className={styles.button}
+                    disabled={isUnfollowing}
+                >
+                    {isUnfollowing ? translations[language].unfollowing : translations[language].unfollow}
+                </button>
+            )}
+            {hasUnfollowed && <span>{translations[language].unfollowed}</span>}
+            {isCurrentlyFollowing && !hasUnfollowed && <span>{translations[language].following}</span>}
+        </li>
+    )
+}
+
+// Traduções para os idiomas suportados
+const translations={
+    pt: {
+        githubUsername: "Nome de usuário do GitHub",
+        githubApiKey: "Chave da API do GitHub",
+        getApiKey: "Obtenha sua chave da API",
+        search: "Buscar",
+        searching: "Buscando...",
+        nonFollowers: "Usuários que você segue e não te seguem:",
+        nonFollowing: "Usuários que te seguem e você não segue:",
+        noUsersFound: "Nenhum usuário encontrado.",
+        unfollowing: "Deixando de seguir...",
+        follow: "Seguir",
+        following: "Seguindo...",
+        unfollow: "Parar de seguir",
+        unfollowed: "Deixou de seguir",
+        followAll: "Seguir todos",
+        unfollowAll: "Parar de seguir todos",
+        followingAll: "Seguindo todos...",
+        unfollowingAll: "Deixando de seguir todos...",
+    },
+    en: {
+        githubUsername: "GitHub Username",
+        githubApiKey: "GitHub API Key",
+        getApiKey: "Get your API key",
+        search: "Search",
+        searching: "Searching...",
+        nonFollowers: "Users you follow who don't follow you:",
+        nonFollowing: "Users who follow you but you don't follow back:",
+        noUsersFound: "No users found.",
+        unfollowing: "Unfollowing...",
+        follow: "Follow",
+        following: "Following...",
+        unfollow: "Unfollow",
+        unfollowed: "Unfollowed",
+        followAll: "Follow all",
+        unfollowAll: "Unfollow all",
+        followingAll: "Following all...",
+        unfollowingAll: "Unfollowing all...",
+    },
+    zh: {
+        githubUsername: "GitHub 用户名",
+        githubApiKey: "GitHub API 密钥",
+        getApiKey: "获取您的 API 密钥",
+        search: "搜索",
+        searching: "搜索中...",
+        nonFollowers: "您关注但未关注您的用户：",
+        nonFollowing: "关注您的用户但您未关注：",
+        noUsersFound: "未找到用户。",
+        unfollowing: "取消关注中...",
+        follow: "关注",
+        following: "关注中...",
+        unfollow: "取消关注",
+        unfollowed: "已取消关注",
+        followAll: "关注所有",
+        unfollowAll: "取消关注所有",
+        followingAll: "正在关注所有...",
+        unfollowingAll: "正在取消关注所有...",
+    },
+    hi: {
+        githubUsername: "GitHub उपयोगकर्ता नाम",
+        githubApiKey: "GitHub API कुंजी",
+        getApiKey: "अपनी API कुंजी प्राप्त करें",
+        search: "खोजें",
+        searching: "खोज जारी है...",
+        nonFollowers: "वे उपयोगकर्ता जिन्हें आप फॉलो करते हैं लेकिन वे आपको फॉलो नहीं करते:",
+        nonFollowing: "वे उपयोगकर्ता जो आपको फॉलो करते हैं लेकिन आप उन्हें फॉलो नहीं करते:",
+        noUsersFound: "कोई उपयोगकर्ता नहीं मिला।",
+        unfollowing: "अनफॉलो कर रहे हैं...",
+        follow: "फॉलो करें",
+        following: "फॉलो कर रहे हैं...",
+        unfollow: "अनफॉलो करें",
+        unfollowed: "अनफॉलो किया गया",
+        followAll: "सभी को फॉलो करें",
+        unfollowAll: "सभी को अनफॉलो करें",
+        followingAll: "सभी को फॉलो कर रहे हैं...",
+        unfollowingAll: "सभी को अनफॉलो कर रहे हैं...",
+    },
+    ar: {
+        githubUsername: "اسم مستخدم GitHub",
+        githubApiKey: "مفتاح API الخاص بـ GitHub",
+        getApiKey: "احصل على مفتاح API الخاص بك",
+        search: "بحث",
+        searching: "جارٍ البحث...",
+        nonFollowers: "المستخدمون الذين تتابعهم ولا يتابعونك:",
+        nonFollowing: "المستخدمون الذين يتابعونك ولا تتابعهم:",
+        noUsersFound: "لم يتم العثور على مستخدمين.",
+        unfollowing: "إلغاء المتابعة...",
+        follow: "متابعة",
+        following: "جارٍ المتابعة...",
+        unfollow: "إلغاء المتابعة",
+        unfollowed: "تم إلغاء المتابعة",
+        followAll: "متابعة الجميع",
+        unfollowAll: "إلغاء متابعة الجميع",
+        followingAll: "جارٍ متابعة الجميع...",
+        unfollowingAll: "جارٍ إلغاء متابعة الجميع...",
+    },
+    ja: {
+        githubUsername: "GitHub ユーザー名",
+        githubApiKey: "GitHub API キー",
+        getApiKey: "API キーを取得",
+        search: "検索",
+        searching: "検索中...",
+        nonFollowers: "フォローしているがフォローされていないユーザー:",
+        nonFollowing: "フォローされているがフォローしていないユーザー:",
+        noUsersFound: "ユーザーが見つかりません。",
+        unfollowing: "フォロー解除中...",
+        follow: "フォロー",
+        following: "フォロー中...",
+        unfollow: "フォロー解除",
+        unfollowed: "フォロー解除済み",
+        followAll: "すべてフォロー",
+        unfollowAll: "すべてフォロー解除",
+        followingAll: "すべてフォロー中...",
+        unfollowingAll: "すべてフォロー解除中...",
+    },
+}
+
+/**
+ * @component HomePage
+ * The main component of the application, responsible for fetching and displaying non-followers and users not being followed back.
+ */
+export default function HomePage() {
+    const [username,setUsername]=useState("")
+    const [apiKey,setApiKey]=useState("")
+    const [nonFollowers,setNonFollowers]=useState<User[]>([])
+    const [nonFollowing,setNonFollowing]=useState<User[]>([])
+    const [unfollowedUsers,setUnfollowedUsers]=useState<string[]>([])
+    const [followingUsers,setFollowingUsers]=useState<string[]>([])
+    const [isSearching,setIsSearching]=useState(false)
+    const [isUnfollowingUser,setIsUnfollowingUser]=useState("")
+    const [isFollowingUser,setIsFollowingUser]=useState("")
+    const [language,setLanguage]=useState<"pt"|"en"|"zh"|"hi"|"ar"|"ja">("pt") // Idioma padrão: Português
+    const [githubService]=useState<GitHubService>(() => new GitHubServiceImpl())
+
+    // Carregar o nome do usuário e a chave da API do localStorage ao inicializar
+    useEffect(() => {
+        const storedUsername = localStorage.getItem("githubUsername");
+        const storedApiKey = localStorage.getItem("githubApiKey");
+        if (storedUsername) {
+            setUsername(storedUsername);
+        }
+        if (storedApiKey) {
+            setApiKey(storedApiKey);
+        }
+    }, []);
+
+    // Atualizar o localStorage sempre que o nome do usuário ou a chave da API mudar
+    useEffect(() => {
+        if (username) {
+            localStorage.setItem("githubUsername", username);
+        }
+    }, [username]);
+
+    useEffect(() => {
+        if (apiKey) {
+            localStorage.setItem("githubApiKey", apiKey);
+        }
+    }, [apiKey]);
+
+    // Função para limpar a chave da API
+    const handleClearApiKey=() => {
+        setApiKey("")
+        localStorage.removeItem("githubApiKey")
+    }
+
+    const handleClearUsername = () => {
+        setUsername("");
+        localStorage.removeItem("githubUsername");
+    };
+
+    /**
+     * @async
+     * @function handleSearchNonFollowers
+     * Fetches the list of non-followers and users not being followed back from GitHub.
+     */
+    const handleSearchNonFollowers = async () => {
+        if (!username || !apiKey) {
+            alert("Por favor, insira seu nome de usuário e chave da API do GitHub.");
+            return;
+        }
+
+        setIsSearching(true);
+        setNonFollowers([]);
+        setNonFollowing([]);
+
+        try {
+            console.log("Buscando usuários que você segue e não te seguem...");
+            const nonFollowersResult = await githubService.fetchNonFollowers(username, apiKey);
+            setNonFollowers(nonFollowersResult);
+
+            console.log("Buscando usuários que te seguem e você não segue...");
+            const nonFollowingResult = await githubService.fetchNonFollowing(username, apiKey);
+            setNonFollowing(nonFollowingResult);
         } catch (error) {
-            console.error(`Erro ao deixar de seguir ${user}:`, error);
+            console.error("Erro ao buscar dados:", error);
+            if (error instanceof Error) {
+                alert(`Erro ao buscar dados: ${error.message}`);
+            } else {
+                alert("Erro ao buscar dados.");
+            }
+        } finally {
+            setIsSearching(false);
         }
     };
 
-    const handleFollow = async (user: string) => {
+    /**
+     * @async
+     * @function handleUnfollow
+     * Unfollows a specific user on GitHub.
+     * @param {string} userLogin - The login of the user to unfollow.
+     */
+    const handleUnfollow=async (userLogin: string) => {
+        if(!apiKey) {
+            alert("Por favor, insira sua chave da API do GitHub.")
+            return
+        }
+
+        setIsUnfollowingUser(userLogin)
         try {
-            const response = await fetch(`https://api.github.com/user/following/${user}`, {
-                method: 'PUT',
-                headers: { Authorization: `token ${apiKey}` },
-            });
-
-            if (!response.ok) {
-                console.error(`Erro ao seguir ${user}: ${response.status} - ${response.statusText}`);
-                return;
+            const success=await githubService.unfollowUser(userLogin,apiKey)
+            if(success) {
+                setNonFollowers((prev) => prev.filter((u) => u.login!==userLogin))
+                setUnfollowedUsers((prev) => [...prev,userLogin])
+                // Optionally, refresh the non-followers list to reflect the change immediately
+                // await handleSearchNonFollowers();
             }
+        } catch(error) {
+            console.error(`Erro ao deixar de seguir ${userLogin}:`,error)
+            if(error instanceof Error) {
+                alert(`Erro ao deixar de seguir ${userLogin}: ${error.message}`)
+            } else {
+                alert(`Erro ao deixar de seguir ${userLogin}.`)
+            }
+        } finally {
+            setIsUnfollowingUser("")
+        }
+    }
 
-            setFollowingUsers((prev) => [...prev, user]);
-            console.log(`Seguindo o usuário: ${user}`);
+    /**
+     * @async
+     * @function handleFollow
+     * Follows a specific user on GitHub.
+     * @param {string} userLogin - The login of the user to follow.
+     */
+    const handleFollow=async (userLogin: string) => {
+        if(!apiKey) {
+            alert("Por favor, insira sua chave da API do GitHub.")
+            return
+        }
+
+        setIsFollowingUser(userLogin)
+        try {
+            const success=await githubService.followUser(userLogin,apiKey)
+            if(success) {
+                setFollowingUsers((prev) => [...prev,userLogin])
+                setNonFollowing((prev) => prev.filter((u) => u.login!==userLogin)) // Remove o usuário da lista
+            }
+        } catch(error) {
+            console.error(`Erro ao seguir ${userLogin}:`,error)
+            if(error instanceof Error) {
+                alert(`Erro ao seguir ${userLogin}: ${error.message}`)
+            } else {
+                alert(`Erro ao seguir ${userLogin}.`)
+            }
+        } finally {
+            setIsFollowingUser("")
+        }
+    }
+
+    /**
+     * @async
+     * @function handleUnfollowAll
+     * Unfollows all users in the non-followers list.
+     */
+    const handleUnfollowAll = async () => {
+        if (!apiKey) {
+            alert("Por favor, insira sua chave da API do GitHub.");
+            return;
+        }
+
+        if (nonFollowers.length === 0) {
+            alert("Nenhum usuário para deixar de seguir.");
+            return;
+        }
+
+        const confirmUnfollow = confirm("Tem certeza de que deseja deixar de seguir todos os usuários?");
+        if (!confirmUnfollow) return;
+
+        setIsSearching(true);
+
+        try {
+            for (const user of nonFollowers) {
+                await githubService.unfollowUser(user.login, apiKey);
+                setNonFollowers((prev) => prev.filter((u) => u.login !== user.login));
+                setUnfollowedUsers((prev) => [...prev, user.login]);
+            }
+            alert("Você deixou de seguir todos os usuários.");
         } catch (error) {
-            console.error(`Erro ao seguir ${user}:`, error);
+            console.error("Erro ao deixar de seguir todos os usuários:", error);
+            alert("Ocorreu um erro ao tentar deixar de seguir todos os usuários.");
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    /**
+     * @async
+     * @function handleFollowAll
+     * Follows all users in the non-following list.
+     */
+    const handleFollowAll = async () => {
+        if (!apiKey) {
+            alert("Por favor, insira sua chave da API do GitHub.");
+            return;
+        }
+
+        if (nonFollowing.length === 0) {
+            alert("Nenhum usuário para seguir.");
+            return;
+        }
+
+        const confirmFollow = confirm("Tem certeza de que deseja seguir todos os usuários?");
+        if (!confirmFollow) return;
+
+        setIsSearching(true);
+
+        try {
+            for (const user of nonFollowing) {
+                await githubService.followUser(user.login, apiKey);
+                setNonFollowing((prev) => prev.filter((u) => u.login !== user.login));
+                setFollowingUsers((prev) => [...prev, user.login]);
+            }
+            alert("Você seguiu todos os usuários.");
+        } catch (error) {
+            console.error("Erro ao seguir todos os usuários:", error);
+            alert("Ocorreu um erro ao tentar seguir todos os usuários.");
+        } finally {
+            setIsSearching(false);
         }
     };
 
@@ -168,46 +625,119 @@ export default function Home() {
         <div className={styles.page}>
             <main className={styles.main}>
                 <div className={styles.ctas}>
-                    <input
-                        type="text"
-                        placeholder="GitHub Username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
+                    <select
+                        value={language}
+                        onChange={(e) => setLanguage(e.target.value as "pt" | "en" | "zh" | "hi" | "ar" | "ja")}
                         className={styles.input}
-                    />
-                    <input
-                        type="text"
-                        placeholder="GitHub API Key"
-                        value={apiKey}
-                        onChange={(e) => setApiKey(e.target.value)}
-                        className={styles.input}
-                    />
-                    <a href={`https://github.com/settings/personal-access-tokens`} target="_blank" rel="noreferrer">Get your API Key</a>
+                    >
+                        <option value="pt">Português</option>
+                        <option value="en">English</option>
+                        <option value="zh">中文</option>
+                        <option value="hi">हिन्दी</option>
+                        <option value="ar">العربية</option>
+                        <option value="ja">日本語</option>
+                    </select>
+                    <div className={styles.inputGroup}>
+                        <input
+                            type="text"
+                            placeholder={translations[language].githubUsername}
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            className={styles.input}
+                        />
+                        <button
+                            onClick={handleClearUsername}
+                            className={styles.clearButton}
+                        >
+                            ✕
+                        </button>
+                    </div>
+                    <div className={styles.inputGroup}>
+                        <input
+                            type="text"
+                            placeholder={translations[language].githubApiKey}
+                            value={apiKey}
+                            onChange={(e) => setApiKey(e.target.value)}
+                            className={styles.input}
+                        />
+                        <button
+                            onClick={handleClearApiKey}
+                            className={styles.clearButton}
+                        >
+                            ✕
+                        </button>
+                    </div>
+                    <a
+                        href={`https://github.com/settings/personal-access-tokens`}
+                        target="_blank"
+                        rel="noreferrer"
+                    >
+                        {translations[language].getApiKey}
+                    </a>
                     <br />
-                    <button onClick={handleSearchNonFollowers} className={styles.button}>Search</button>
+                    <button onClick={handleSearchNonFollowers} className={styles.button} disabled={isSearching}>
+                        {isSearching ? translations[language].searching : translations[language].search}
+                    </button>
+                    <button
+                        onClick={handleUnfollowAll}
+                        className={styles.button}
+                        disabled={isUnfollowingUser !== "" || nonFollowers.length === 0}
+                    >
+                        {isUnfollowingUser !== ""
+                            ? translations[language].unfollowingAll
+                            : translations[language].unfollowAll}
+                    </button>
+                    <button
+                        onClick={handleFollowAll}
+                        className={styles.button}
+                        disabled={isFollowingUser !== "" || nonFollowing.length === 0}
+                    >
+                        {isFollowingUser !== ""
+                            ? translations[language].followingAll
+                            : translations[language].followAll}
+                    </button>
                 </div>
 
+                <h2>{translations[language].nonFollowers}</h2>
                 <ul className={styles.list}>
-                    {nonFollowers.map((user, index) => (
-                        <li key={`${user.login}-${index}`} className={styles.listItem}>
-                            <Image src={user.avatar_url} alt={user.login} width={50} height={50} className={styles.avatar} />
-                            <a href={`https://github.com/${user.login}`}>{user.login}</a>
-                            <button onClick={() => handleUnfollow(user.login)} className={styles.button}>
-                                {unfollowedUsers.includes(user.login) ? "Deixou de seguir" : "Parar de seguir"}
-                            </button>
-                        </li>
+                    {nonFollowers.map((user) => (
+                        <UserCard
+                            key={user.login}
+                            user={user}
+                            onUnfollow={handleUnfollow}
+                            onFollow={handleFollow}
+                            isUnfollowing={isUnfollowingUser === user.login}
+                            isFollowing={isFollowingUser === user.login}
+                            hasUnfollowed={unfollowedUsers.includes(user.login)}
+                            isCurrentlyFollowing={followingUsers.includes(user.login)}
+                            language={language} // Passa o idioma selecionado
+                        />
                     ))}
+                    {nonFollowers.length === 0 && !isSearching && (
+                        <li className={styles.listItem}>{translations[language].noUsersFound}</li>
+                    )}
+                    {isSearching && <li className={styles.listItem}>{translations[language].searching}</li>}
                 </ul>
+
+                <h2>{translations[language].nonFollowing}</h2>
                 <ul className={styles.list}>
-                    {nonFollowing.map((user, index) => (
-                        <li key={`${user.login}-${index}`} className={styles.listItem}>
-                            <Image src={user.avatar_url} alt={user.login} width={50} height={50} className={styles.avatar} />
-                            <a href={`https://github.com/${user.login}`}>{user.login}</a>
-                            <button onClick={() => handleFollow(user.login)} className={styles.button}>
-                                {followingUsers.includes(user.login) ? "Seguindo" : "Seguir"}
-                            </button>
-                        </li>
+                    {nonFollowing.map((user) => (
+                        <UserCard
+                            key={user.login}
+                            user={user}
+                            onUnfollow={() => {}} // Unfollow action is not relevant here
+                            onFollow={handleFollow}
+                            isUnfollowing={false}
+                            isFollowing={isFollowingUser === user.login}
+                            hasUnfollowed={false}
+                            isCurrentlyFollowing={followingUsers.includes(user.login)}
+                            language={language} // Passa o idioma selecionado
+                        />
                     ))}
+                    {nonFollowing.length === 0 && !isSearching && (
+                        <li className={styles.listItem}>{translations[language].noUsersFound}</li>
+                    )}
+                    {isSearching && <li className={styles.listItem}>{translations[language].searching}</li>}
                 </ul>
             </main>
         </div>
