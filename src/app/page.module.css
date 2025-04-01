@@ -2,20 +2,16 @@
     --gray-rgb: 0, 0, 0;
     --gray-alpha-200: rgba(var(--gray-rgb), 0.08);
     --gray-alpha-100: rgba(var(--gray-rgb), 0.05);
-
-    --button-primary-hover: #383838;
-    --button-secondary-hover: #f2f2f2;
-
     display: grid;
     grid-template-rows: 20px 1fr 20px;
     align-items: center;
     justify-items: center;
     min-height: 100svh;
-    padding: 80px;
+    padding: var(--padding-mobile);
     gap: 64px;
     font-family: var(--font-geist-sans);
-    background-color: #f6f8fa;
-    color: #24292e;
+    background-color: var(--background);
+    color: var(--foreground);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
     padding: 20px;
 }
@@ -34,14 +30,15 @@
 .main {
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 2rem;
     grid-row-start: 2;
-    max-width: 800px;
+    width: 100%;
+    max-width: var(--max-width-mobile);
     margin: 0 auto;
-    padding: 20px;
-    background-color: #ffffff;
-    border: 1px solid #e1e4e8;
-    border-radius: 6px;
+    padding: var(--padding-mobile);
+    background-color: var(--background);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
 }
 
 .main ol {
@@ -68,10 +65,10 @@
 
 .ctas {
     display: flex;
-    gap: 16px;
     flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 1rem;
+    width: 100%;
+    margin-bottom: 2rem;
 }
 
 .ctas a {
@@ -122,37 +119,59 @@ a.secondary {
 }
 
 .input {
-    padding: 10px;
-    border: 1px solid #e1e4e8;
-    border-radius: 6px;
-    font-size: 16px;
+    width: 100%;
+    min-height: 48px;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    background: var(--background);
+    color: var(--foreground);
+}
+
+.input::placeholder {
+    color: #666;
 }
 
 .button {
-    padding: 10px 20px;
-    background-color: #2ea44f;
-    color: #ffffff;
-    border: none;
-    border-radius: 6px;
-    font-size: 16px;
+    width: 100%;
+    padding: 0.875rem;
+    background-color: var(--button-primary);
+    color: var(--button-text);
+    border: 1px solid var(--button-border);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
     cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
-.button:hover {
-    background-color: #2c974b;
+.button:hover:not(:disabled) {
+    background-color: var(--button-primary-hover);
+}
+
+.button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    width: 100%;
     list-style: none;
     padding: 0;
 }
 
 .listItem {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
-    padding: 10px;
-    border-bottom: 1px solid #e1e4e8;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: var(--background);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
 }
 
 .listItem:last-child {
@@ -160,15 +179,18 @@ a.secondary {
 }
 
 .avatar {
+    width: 2.5rem;
+    height: 2.5rem;
     border-radius: 50%;
     margin-right: 10px;
 }
 
 .inputGroup {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     width: 100%;
     position: relative;
+    margin-bottom: 1rem;
 }
 
 .inputGroup .input {
@@ -275,5 +297,236 @@ a.secondary {
 @media (prefers-color-scheme: dark) {
     .logo {
         filter: invert();
+    }
+}
+
+@media (min-width: 640px) {
+    .main {
+        max-width: var(--max-width-tablet);
+        padding: var(--padding-tablet);
+    }
+
+    /* Ajuste do layout em telas médias para seguir o mesmo padrão de telas grandes */
+    .ctas {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1.5rem;
+    }
+
+    .inputContainer {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        width: 100%;
+    }
+
+    .inputGroup {
+        width: 100%;
+        margin: 0;
+    }
+
+    .buttonGroup {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        width: 100%;
+    }
+
+    .buttonGroup button:first-child {
+        grid-column: 1 / -1;
+        margin-bottom: 0.5rem;
+    }
+
+    .buttonGroup button {
+        width: 100%;
+    }
+
+    /* O select e o link ocupam toda a largura */
+    .ctas select,
+    .ctas a {
+        width: 100%;
+    }
+}
+
+@media (min-width: 1024px) {
+    .main {
+        max-width: var(--max-width-desktop);
+        padding: var(--padding-desktop);
+        gap: 3rem;
+    }
+
+    .ctas {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+    }
+
+    .inputGroup {
+        margin-bottom: 0;
+    }
+
+    /* O select de idiomas ocupa uma coluna inteira */
+    .ctas select {
+        grid-column: span 2;
+    }
+
+    /* Os campos de username e API key ficam lado a lado */
+    .ctas .inputGroup {
+        grid-column: span 1;
+    }
+
+    /* O link para API key ocupa uma coluna inteira */
+    .ctas a {
+        grid-column: span 2;
+        width: fit-content;
+        margin: 0 auto;
+    }
+
+    /* Os botões de ação ficam em uma linha com 3 colunas */
+    .ctas .button-group {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        grid-column: span 2;
+        max-width: none;
+        width: 100%;
+    }
+
+    .ctas .button {
+        min-width: 200px;
+    }
+
+    /* Layout das listas em duas colunas */
+    .lists-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+        align-items: start;
+    }
+
+    .list-section {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .list {
+        grid-template-columns: 1fr;
+        max-height: 70vh;
+        overflow-y: auto;
+        padding-right: 1rem;
+    }
+
+    .list::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .list::-webkit-scrollbar-track {
+        background: var(--gray-alpha-100);
+        border-radius: 4px;
+    }
+
+    .list::-webkit-scrollbar-thumb {
+        background: var(--button-primary);
+        border-radius: 4px;
+    }
+
+    .buttonGroup {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        width: 100%;
+        margin: 0 auto;
+        grid-column: 1 / -1; /* Faz o grupo de botões ocupar todas as colunas */
+    }
+
+    .buttonGroup button:first-child {
+        grid-column: 1 / -1;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .buttonGroup button {
+        width: 100%;
+        height: 48px;
+        font-size: 1rem;
+    }
+
+    /* Ajuste do container de inputs */
+    .inputContainer {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+        width: 100%;
+        grid-column: 1 / -1; /* Faz o container ocupar todas as colunas */
+    }
+
+    .inputGroup {
+        width: 100%;
+        margin: 0;
+    }
+
+    /* O select de idiomas ocupa toda a largura */
+    .ctas select {
+        grid-column: 1 / -1;
+        width: 100%;
+        max-width: none;
+        margin-bottom: 1rem;
+    }
+
+    /* O link para API key ocupa toda a largura */
+    .ctas a {
+        grid-column: 1 / -1;
+        width: 100%;
+        text-align: center;
+        margin: 1rem 0;
+    }
+}
+
+.listHeader {
+    position: sticky;
+    top: 0;
+    background: var(--background);
+    padding: 1rem 0;
+    margin: 0;
+    z-index: 10;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+@media (min-width: 1024px) {
+    .listsContainer {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+        align-items: start;
+    }
+
+    .listSection {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .list {
+        grid-template-columns: 1fr;
+        max-height: 70vh;
+        overflow-y: auto;
+        padding-right: 1rem;
+    }
+
+    .list::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .list::-webkit-scrollbar-track {
+        background: var(--gray-alpha-100);
+        border-radius: 4px;
+    }
+
+    .list::-webkit-scrollbar-thumb {
+        background: var(--button-primary);
+        border-radius: 4px;
     }
 }
