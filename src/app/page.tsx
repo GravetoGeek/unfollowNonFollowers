@@ -709,8 +709,8 @@ export default function HomePage() {
                             isUnfollowing={isUnfollowingUser === user.login}
                             isFollowing={isFollowingUser === user.login}
                             hasUnfollowed={unfollowedUsers.includes(user.login)}
-                            isCurrentlyFollowing={followingUsers.includes(user.login)}
-                            language={language} // Passa o idioma selecionado
+                            isCurrentlyFollowing={!unfollowedUsers.includes(user.login)} // Alterado aqui
+                            language={language}
                         />
                     ))}
                     {nonFollowers.length === 0 && !isSearching && (
