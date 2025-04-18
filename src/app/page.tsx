@@ -130,6 +130,7 @@ export default function HomePage() {
             <main className={styles.main}>
                 <div className={styles.ctas}>
                     <select
+                        id="language-select"
                         value={language}
                         onChange={(e) => setLanguage(e.target.value as SupportedLanguages)}
                         className={styles.input}
@@ -145,6 +146,7 @@ export default function HomePage() {
                     <div className={styles.inputContainer}>
                         <div className={styles.inputGroup}>
                             <input
+                                id="username-input"
                                 type="text"
                                 placeholder={translations[language].githubUsername}
                                 value={username}
@@ -152,6 +154,7 @@ export default function HomePage() {
                                 className={styles.input}
                             />
                             <button
+                                id="clear-username-button"
                                 onClick={handleClearUsername}
                                 className={styles.clearButton}
                             >
@@ -160,6 +163,7 @@ export default function HomePage() {
                         </div>
                         <div className={styles.inputGroup}>
                             <input
+                                id="api-key-input"
                                 type="text"
                                 placeholder={translations[language].githubApiKey}
                                 value={apiKey}
@@ -167,6 +171,7 @@ export default function HomePage() {
                                 className={styles.input}
                             />
                             <button
+                                id="clear-api-key-button"
                                 onClick={handleClearApiKey}
                                 className={styles.clearButton}
                             >

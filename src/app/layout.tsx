@@ -1,5 +1,6 @@
 import type {Metadata} from "next"
 import {Geist,Geist_Mono} from "next/font/google"
+import favicon from "./favicon.ico"
 import "./globals.css"
 
 const geistSans=Geist({
@@ -16,28 +17,39 @@ export const metadata: Metadata={
     title: "Unfollow Non-Followers",
     description: "A simple tool to manage your GitHub followers",
     icons: {
-        icon: "/favicon.ico",
-        shortcut: "/favicon.ico",
-        apple: "/apple-touch-icon.png",
+        icon: favicon.src,
+        shortcut: favicon.src,
         other: [
             {
                 rel: "icon",
-                url: "/favicon.ico",
+                url: favicon.src,
             },
         ],
+    },
+    alternates: {
+        canonical: "https://unfollow-non-followers.vercel.app",
+        languages: {
+            "es-ES": "/es-ES",
+            "pt-BR": "/pt-BR",
+            "zh-CN": "/zh-CN",
+            "hi-IN": "/hi-IN",
+            "ar-SA": "/ar-SA",
+            "ja-JP": "/ja-JP",
+
+        },
     },
     openGraph: {
         title: "Unfollow Non-Followers",
         description: "A simple tool to manage your GitHub followers",
         url: "https://unfollow-non-followers.vercel.app",
         siteName: "Unfollow Non-Followers",
-        images: [
-            {
-                url: "/og-image.png",
-                width: 1200,
-                height: 630,
-            },
-        ],
+        // images: [
+        //     {
+        //         url: favicon.src,
+        //         width: 1200,
+        //         height: 630,
+        //     },
+        // ],
     },
 }
 
