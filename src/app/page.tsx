@@ -141,6 +141,7 @@ export default function HomePage() {
                     <Modal
                         message={modalMessage}
                         onClose={() => setModalMessage(null)}
+                        language={language} // Passa o idioma selecionado
                     />
                 )}
                 {/* Modal de confirmação */}

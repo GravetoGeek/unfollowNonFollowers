@@ -23,6 +23,7 @@ interface Translation {
     errorMissingCredentials: string
     confirm: string
     cancel: string
+    close: string
 }
 
 export const translations: Record<SupportedLanguages, Translation> = {
@@ -49,6 +50,7 @@ export const translations: Record<SupportedLanguages, Translation> = {
         errorMissingCredentials: "Por favor, insira seu nome de usuário e chave da API do GitHub.",
         confirm: "Confirmar",
         cancel: "Cancelar",
+        close: "Fechar",
     },
     en: {
         githubUsername: "GitHub Username",
@@ -73,6 +75,7 @@ export const translations: Record<SupportedLanguages, Translation> = {
         errorMissingCredentials: "Please enter your GitHub username and API key.",
         confirm: "Confirm",
         cancel: "Cancel",
+        close: "Close",
     },
     zh: {
         githubUsername: "GitHub 用户名",
@@ -97,6 +100,7 @@ export const translations: Record<SupportedLanguages, Translation> = {
         errorMissingCredentials: "请输入您的 GitHub 用户名和 API 密钥。",
         confirm: "确认",
         cancel: "取消",
+        close: "关闭",
     },
     hi: {
         githubUsername: "GitHub उपयोगकर्ता नाम",
@@ -121,6 +125,7 @@ export const translations: Record<SupportedLanguages, Translation> = {
         errorMissingCredentials: "कृपया अपना GitHub उपयोगकर्ता नाम और API कुंजी दर्ज करें।",
         confirm: "पुष्टि करें",
         cancel: "रद्द करें",
+        close: "बंद करें",
     },
     ar: {
         githubUsername: "اسم مستخدم GitHub",
@@ -145,6 +150,7 @@ export const translations: Record<SupportedLanguages, Translation> = {
         errorMissingCredentials: "الرجاء إدخال اسم المستخدم ومفتاح API الخاص بك في GitHub.",
         confirm: "تأكيد",
         cancel: "إلغاء",
+        close: "إغلاق",
     },
     ja: {
         githubUsername: "GitHub ユーザー名",
@@ -169,5 +175,6 @@ export const translations: Record<SupportedLanguages, Translation> = {
         errorMissingCredentials: "GitHubのユーザー名とAPIキーを入力してください。",
         confirm: "確認",
         cancel: "キャンセル",
+        close: "閉じる",
     },
 }
