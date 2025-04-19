@@ -21,6 +21,8 @@ interface Translation {
     confirmFollowAll: string
     confirmUnfollowAll: string
     errorMissingCredentials: string
+    confirm: string
+    cancel: string
 }
 
 export const translations: Record<SupportedLanguages, Translation> = {
@@ -45,6 +47,8 @@ export const translations: Record<SupportedLanguages, Translation> = {
         confirmFollowAll: "Tem certeza que deseja seguir todos os usuários?",
         confirmUnfollowAll: "Tem certeza que deseja deixar de seguir todos os usuários?",
         errorMissingCredentials: "Por favor, insira seu nome de usuário e chave da API do GitHub.",
+        confirm: "Confirmar",
+        cancel: "Cancelar",
     },
     en: {
         githubUsername: "GitHub Username",
@@ -67,6 +71,8 @@ export const translations: Record<SupportedLanguages, Translation> = {
         confirmFollowAll: "Are you sure you want to follow all users?",
         confirmUnfollowAll: "Are you sure you want to unfollow all users?",
         errorMissingCredentials: "Please enter your GitHub username and API key.",
+        confirm: "Confirm",
+        cancel: "Cancel",
     },
     zh: {
         githubUsername: "GitHub 用户名",
@@ -89,6 +95,8 @@ export const translations: Record<SupportedLanguages, Translation> = {
         confirmFollowAll: "您确定要关注所有用户吗？",
         confirmUnfollowAll: "您确定要取消关注所有用户吗？",
         errorMissingCredentials: "请输入您的 GitHub 用户名和 API 密钥。",
+        confirm: "确认",
+        cancel: "取消",
     },
     hi: {
         githubUsername: "GitHub उपयोगकर्ता नाम",
@@ -111,6 +119,8 @@ export const translations: Record<SupportedLanguages, Translation> = {
         confirmFollowAll: "क्या आप सभी उपयोगकर्ताओं को फॉलो करना चाहते हैं?",
         confirmUnfollowAll: "क्या आप सभी उपयोगकर्ताओं को अनफॉलो करना चाहते हैं?",
         errorMissingCredentials: "कृपया अपना GitHub उपयोगकर्ता नाम और API कुंजी दर्ज करें।",
+        confirm: "पुष्टि करें",
+        cancel: "रद्द करें",
     },
     ar: {
         githubUsername: "اسم مستخدم GitHub",
@@ -133,6 +143,8 @@ export const translations: Record<SupportedLanguages, Translation> = {
         confirmFollowAll: "هل أنت متأكد من أنك تريد متابعة جميع المستخدمين؟",
         confirmUnfollowAll: "هل أنت متأكد من أنك تريد إلغاء متابعة جميع المستخدمين؟",
         errorMissingCredentials: "الرجاء إدخال اسم المستخدم ومفتاح API الخاص بك في GitHub.",
+        confirm: "تأكيد",
+        cancel: "إلغاء",
     },
     ja: {
         githubUsername: "GitHub ユーザー名",
@@ -155,5 +167,7 @@ export const translations: Record<SupportedLanguages, Translation> = {
         confirmFollowAll: "すべてのユーザーをフォローしますか？",
         confirmUnfollowAll: "すべてのユーザーのフォローを解除しますか？",
         errorMissingCredentials: "GitHubのユーザー名とAPIキーを入力してください。",
+        confirm: "確認",
+        cancel: "キャンセル",
     },
 }

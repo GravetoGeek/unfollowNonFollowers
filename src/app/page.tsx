@@ -1,19 +1,23 @@
 "use client"
 
 import {useEffect,useState} from 'react'
+import ConfirmationModal from './components/Modal/ConfirmationModal'
+import Modal from './components/Modal/Modal'
 import {UserCard} from './components/UserCard/UserCard'
-import type {SupportedLanguages} from './constants/translations'
-import {translations} from './constants/translations'
+import {SupportedLanguages,translations} from './constants/translations'
 import {useGitHubOperations} from './hooks/useGitHubOperations'
 import styles from './page.module.css'
 import {GitHubServiceImpl} from './services/GitHubService'
 
 export default function HomePage() {
-    const [username, setUsername] = useState("")
-    const [apiKey, setApiKey] = useState("")
-    const [language, setLanguage] = useState<SupportedLanguages>("pt")
+    const [username, setUsername] = useState("");
+    const [apiKey, setApiKey] = useState("");
+    const [language, setLanguage] = useState<SupportedLanguages>("pt");
+    const [modalMessage, setModalMessage] = useState<string | null>(null);
+    const [confirmationMessage, setConfirmationMessage] = useState<string | null>(null);
+    const [onConfirm, setOnConfirm] = useState<(() => Promise<void>) | null>(null);
 
-    const githubOperations = useGitHubOperations(new GitHubServiceImpl())
+    const githubOperations = useGitHubOperations(new GitHubServiceImpl());
     const {
         nonFollowers,
         nonFollowing,
@@ -67,13 +71,13 @@ export default function HomePage() {
 
     const handleSearch = async () => {
         if (!username || !apiKey) {
-            alert(translations[language].errorMissingCredentials);
+            setModalMessage(translations[language].errorMissingCredentials); // Define a mensagem do modal
             return;
         }
         try {
             await handleSearchNonFollowers(username, apiKey);
         } catch (error) {
-            alert(error instanceof Error ? error.message : "An error occurred");
+            setModalMessage(error instanceof Error ? error.message : "An error occurred");
         }
     }
 
@@ -81,7 +85,7 @@ export default function HomePage() {
         try {
             await handleUnfollow(userLogin, apiKey);
         } catch (error) {
-            alert(error instanceof Error ? error.message : "An error occurred");
+            setModalMessage(error instanceof Error ? error.message : "An error occurred");
         }
     }
 
@@ -89,45 +93,72 @@ export default function HomePage() {
         try {
             await handleFollow(userLogin, apiKey);
         } catch (error) {
-            alert(error instanceof Error ? error.message : "An error occurred");
+            setModalMessage(error instanceof Error ? error.message : "An error occurred");
         }
     }
 
-    const handleUnfollowAllClick = async () => {
+    const handleUnfollowAllClick = () => {
         if (!apiKey) {
-            alert(translations[language].errorMissingCredentials);
+            setModalMessage(translations[language].errorMissingCredentials);
             return;
         }
 
-        const confirmUnfollow = confirm(translations[language].confirmUnfollowAll);
-        if (!confirmUnfollow) return;
+        setConfirmationMessage(translations[language].confirmUnfollowAll);
+        setOnConfirm(() => async () => {
+            try {
+                await handleUnfollowAll(apiKey);
+                setConfirmationMessage(null);
+                setOnConfirm(null); // Limpa o estado após a execução
+            } catch (error) {
+                setModalMessage(error instanceof Error ? error.message : "An error occurred");
+            }
+        });
+    };
 
-        try {
-            await handleUnfollowAll(apiKey);
-        } catch (error) {
-            alert(error instanceof Error ? error.message : "An error occurred");
-        }
-    }
-
-    const handleFollowAllClick = async () => {
+    const handleFollowAllClick = () => {
         if (!apiKey) {
-            alert(translations[language].errorMissingCredentials);
+            setModalMessage(translations[language].errorMissingCredentials);
             return;
         }
 
-        const confirmFollow = confirm(translations[language].confirmFollowAll);
-        if (!confirmFollow) return;
-
-        try {
-            await handleFollowAll(apiKey);
-        } catch (error) {
-            alert(error instanceof Error ? error.message : "An error occurred");
-        }
-    }
+        setConfirmationMessage(translations[language].confirmFollowAll);
+        setOnConfirm(() => async () => {
+            try {
+                await handleFollowAll(apiKey);
+                setConfirmationMessage(null);
+                setOnConfirm(null); // Limpa o estado após a execução
+            } catch (error) {
+                setModalMessage(error instanceof Error ? error.message : "An error occurred");
+            }
+        });
+    };
 
     return (
         <div className={styles.page}>
             <main className={styles.main}>
+                {/* Modal de mensagem */}
+                {modalMessage && (
+                    <Modal
+                        message={modalMessage}
+                        onClose={() => setModalMessage(null)}
+                    />
+                )}
+                {/* Modal de confirmação */}
+                {confirmationMessage && (
+                    <ConfirmationModal
+                        message={confirmationMessage}
+                        onConfirm={async () => {
+                            if (onConfirm) {
+                                await onConfirm(); // Chama a função de confirmação
+                            }
+                        }}
+                        onCancel={() => {
+                            setConfirmationMessage(null);
+                            setOnConfirm(null);
+                        }}
+                        language={language} // Passa o idioma selecionado
+                    />
+                )}
                 <div className={styles.ctas}>
                     <select
                         id="language-select"
