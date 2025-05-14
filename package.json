@@ -10,17 +10,18 @@
         "clearBranchsLinux": "git fetch -p && for branch in `git branch -vv | grep ': gone]' | awk '{print $1}'`; do git branch -D $branch; done"
     },
     "dependencies": {
+        "html-react-parser": "^5.2.3",
+        "next": "^15.3.1",
         "react": "^19.0.0",
-        "react-dom": "^19.0.0",
-        "next": "15.2.2"
+        "react-dom": "^19.0.0"
     },
     "devDependencies": {
-        "typescript": "^5",
+        "@eslint/eslintrc": "^3",
         "@types/node": "^20",
         "@types/react": "^19",
         "@types/react-dom": "^19",
         "eslint": "^9",
         "eslint-config-next": "15.2.2",
-        "@eslint/eslintrc": "^3"
+        "typescript": "^5"
     }
 }
