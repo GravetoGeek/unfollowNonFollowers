@@ -32,7 +32,6 @@ export const useGitHubOperations = (githubService: GitHubService) => {
     }
 
     const handleUnfollow = async (userLogin: string, token: string, language: SupportedLanguages) => {
-        // console.log({userLogin, token, language})
         setIsUnfollowingUser(userLogin)
         try {
             const success = await githubService.unfollowUser(userLogin, token, language)
@@ -42,6 +41,7 @@ export const useGitHubOperations = (githubService: GitHubService) => {
             }
             return success
         } catch (error) {
+            console.error(error)
             throw new Error(translations[language].httpErrorMessage[401].join('\n'));
         } finally {
             setIsUnfollowingUser("")
@@ -58,6 +58,7 @@ export const useGitHubOperations = (githubService: GitHubService) => {
             }
             return success
         } catch (error) {
+            console.error(error)
             throw new Error(translations[language].httpErrorMessage[401].join('\n'));
         } finally {
             setIsFollowingUser("")
