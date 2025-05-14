@@ -1,5 +1,6 @@
 "use client"
 
+import parse from 'html-react-parser'
 import {useEffect,useState} from 'react'
 import ConfirmationModal from './components/Modal/ConfirmationModal'
 import Modal from './components/Modal/Modal'
@@ -75,7 +76,7 @@ export default function HomePage() {
             return;
         }
         try {
-            await handleSearchNonFollowers(username, apiKey);
+            await handleSearchNonFollowers(username, apiKey, language);
         } catch (error) {
             setModalMessage(error instanceof Error ? error.message : "An error occurred");
         }
@@ -83,7 +84,7 @@ export default function HomePage() {
 
     const handleUnfollowClick = async (userLogin: string) => {
         try {
-            await handleUnfollow(userLogin, apiKey);
+            await handleUnfollow(userLogin, apiKey, language);
         } catch (error) {
             setModalMessage(error instanceof Error ? error.message : "An error occurred");
         }
@@ -91,7 +92,7 @@ export default function HomePage() {
 
     const handleFollowClick = async (userLogin: string) => {
         try {
-            await handleFollow(userLogin, apiKey);
+            await handleFollow(userLogin, apiKey, language);
         } catch (error) {
             setModalMessage(error instanceof Error ? error.message : "An error occurred");
         }
@@ -106,9 +107,9 @@ export default function HomePage() {
         setConfirmationMessage(translations[language].confirmUnfollowAll);
         setOnConfirm(() => async () => {
             try {
-                await handleUnfollowAll(apiKey);
-                setConfirmationMessage(null);
-                setOnConfirm(null); // Limpa o estado após a execução
+                await handleUnfollowAll(apiKey, language);
+                await setConfirmationMessage(null);
+                await setOnConfirm(null); // Limpa o estado após a execução
             } catch (error) {
                 setModalMessage(error instanceof Error ? error.message : "An error occurred");
             }
@@ -124,7 +125,7 @@ export default function HomePage() {
         setConfirmationMessage(translations[language].confirmFollowAll);
         setOnConfirm(() => async () => {
             try {
-                await handleFollowAll(apiKey);
+                await handleFollowAll(apiKey, language);
                 setConfirmationMessage(null);
                 setOnConfirm(null); // Limpa o estado após a execução
             } catch (error) {
@@ -139,7 +140,7 @@ export default function HomePage() {
                 {/* Modal de mensagem */}
                 {modalMessage && (
                     <Modal
-                        message={modalMessage}
+                        message={parse(modalMessage)} // Renderiza o HTML formatado
                         onClose={() => setModalMessage(null)}
                         language={language} // Passa o idioma selecionado
                     />

@@ -1,23 +1,25 @@
+import {SupportedLanguages,translations} from '../constants/translations'
 import {GitHubService} from '../interfaces/GitHubService'
 import {User} from '../interfaces/User'
 
 export class GitHubServiceImpl implements GitHubService {
     private readonly baseUrl="https://api.github.com";
 
-    async fetchAllPages<T>(url: string,token: string): Promise<T[]> {
+    async fetchAllPages<T>(url: string,token: string,language: SupportedLanguages): Promise<T[]> {
         let results: T[]=[] // Rewritten line
         let currentPage=1
         let hasMorePages=true
 
         try {
-            console.log('fetchAllPages - Fetching data from:',url)
             while(hasMorePages) {
                 const response=await fetch(`${url}?per_page=100&page=${currentPage}`,{
                     headers: {Authorization: `token ${token}`},
                 })
-
                 if(!response.ok) {
-                    throw new Error(`Erro ao buscar dados na página ${currentPage}: ${response.status} - ${response.statusText}`)
+                    if(response.status==401){
+                        throw new Error(translations[language].httpErrorMessage[response.status].join('\n'))
+                    }
+                    throw new Error(translations[language].catchErrorMessage.fetchOnePage({currentPage,status:response.status,statusText:response.statusText}))
                 }
 
                 const data: T[]=await response.json()
@@ -32,26 +34,27 @@ export class GitHubServiceImpl implements GitHubService {
         } catch(error) {
             console.error('Erro ao buscar páginas:',error)
             if(error instanceof Error) {
-                throw new Error(`Falha ao obter dados de múltiplas páginas: ${error.message}`)
+                throw new Error(translations[language].catchErrorMessage.fetchManyPages({message:error.message}))
             } else {
-                throw new Error('Falha ao obter dados de múltiplas páginas.')
+                throw new Error(translations[language].catchErrorMessage.genericFetchManyPages)
             }
         }
 
         return results
     }
 
-    async fetchNonFollowers(username: string,token: string): Promise<User[]> {
+    async fetchNonFollowers(username: string,token: string,language:SupportedLanguages): Promise<User[]> {
         try {
-            console.log('fetchNonFollowers - Fetching non-followers for:',username)
             const following=await this.fetchAllPages<User>(
                 `${this.baseUrl}/users/${username}/following`,
                 token,
+                language,
             )
 
             const followers=await this.fetchAllPages<User>(
                 `${this.baseUrl}/users/${username}/followers`,
                 token,
+                language,
             )
 
             const followersLogins=followers.map((follower) => follower.login)
@@ -64,24 +67,25 @@ export class GitHubServiceImpl implements GitHubService {
         } catch(error) {
             console.error('Erro ao buscar não seguidores:',error)
             if(error instanceof Error) {
-                throw new Error(`Falha ao buscar não seguidores: ${error.message}`)
+                throw new Error(translations[language].catchErrorMessage.fetchNonFollowers({message:error.message}))
             } else {
-                throw new Error('Falha ao buscar não seguidores.')
+                throw new Error(translations[language].catchErrorMessage.genericFetchNonFollowers)
             }
         }
     }
 
-    async fetchNonFollowing(username: string,token: string): Promise<User[]> {
+    async fetchNonFollowing(username: string,token: string,language:SupportedLanguages): Promise<User[]> {
         try {
-            console.log('fetchNonFollowing - Fetching non-following for:',username)
             const followers=await this.fetchAllPages<User>(
                 `${this.baseUrl}/users/${username}/followers`,
                 token,
+                language,
             )
 
             const following=await this.fetchAllPages<User>(
                 `${this.baseUrl}/users/${username}/following`,
                 token,
+                language,
             )
 
             const followingLogins=following.map((user) => user.login)
@@ -94,40 +98,42 @@ export class GitHubServiceImpl implements GitHubService {
         } catch(error) {
             console.error('Erro ao buscar não seguidos:',error)
             if(error instanceof Error) {
-                throw new Error(`Falha ao buscar não seguidos: ${error.message}`)
+                throw new Error(translations[language].catchErrorMessage.fetchNonFollowing({message:error.message}))
             } else {
-                throw new Error('Falha ao buscar não seguidos.')
+                throw new Error(translations[language].catchErrorMessage.genericFetchNonFollowing)
             }
         }
     }
 
-    async unfollowUser(usernameToUnfollow: string,token: string): Promise<boolean> {
+    async unfollowUser(usernameToUnfollow: string,token: string,language:SupportedLanguages): Promise<boolean> {
         try {
-            console.log(`unfollowUser - Unfollowing user: ${usernameToUnfollow}`)
             const response=await fetch(`${this.baseUrl}/user/following/${usernameToUnfollow}`,{
                 method: 'DELETE',
                 headers: {Authorization: `token ${token}`},
             })
 
+
             if(!response.ok) {
-                console.error(`Erro ao deixar de seguir ${usernameToUnfollow}: ${response.status} - ${response.statusText}`)
+                // console.error(`Erro ao deixar de seguir ${usernameToUnfollow}: ${response.status} - ${response.statusText}`)
+                if (response.status === 403) {
+                    throw new Error(translations[language].httpErrorMessage[403]?.join('\n') || 'Acesso proibido.');
+                }
                 return false
             }
 
             return true
         } catch(error) {
-            console.error(`Erro ao deixar de seguir ${usernameToUnfollow}:`,error)
+            // console.error(`Erro ao deixar de seguir ${usernameToUnfollow}:`,error)
             if(error instanceof Error) {
-                throw new Error(`Falha ao deixar de seguir ${usernameToUnfollow}: ${error.message}`)
+                throw new Error(translations[language].catchErrorMessage.unfollowUser({username:usernameToUnfollow,message:error.message}))
             } else {
-                throw new Error(`Falha ao deixar de seguir ${usernameToUnfollow}.`)
+                throw new Error(translations[language].catchErrorMessage.genericUnfollowUser)
             }
         }
     }
 
-    async followUser(usernameToFollow: string,token: string): Promise<boolean> {
+    async followUser(usernameToFollow: string,token: string,language:SupportedLanguages): Promise<boolean> {
         try {
-            console.log(`followUser - Following user: ${usernameToFollow}`)
             const response=await fetch(`${this.baseUrl}/user/following/${usernameToFollow}`,{
                 method: 'PUT',
                 headers: {Authorization: `token ${token}`},
@@ -140,11 +146,10 @@ export class GitHubServiceImpl implements GitHubService {
 
             return true
         } catch(error) {
-            console.error(`Erro ao seguir ${usernameToFollow}:`,error)
             if(error instanceof Error) {
-                throw new Error(`Falha ao seguir ${usernameToFollow}: ${error.message}`)
+                throw new Error(translations[language].catchErrorMessage.followUser({username:usernameToFollow,message:error.message}))
             } else {
-                throw new Error(`Falha ao seguir ${usernameToFollow}.`)
+                throw new Error(translations[language].catchErrorMessage.genericFollowUser)
             }
         }
     }

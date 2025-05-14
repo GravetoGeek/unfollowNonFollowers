@@ -1,7 +1,8 @@
+import React from 'react'
 import {SupportedLanguages,translations} from '../../constants/translations'
 import styles from './Modal.module.css'
 interface ModalProps {
-    message: string;
+    message: React.ReactNode; // Permite qualquer tipo de conteúdo, incluindo HTML
     onClose: () => void;
     language: SupportedLanguages; // Recebe o idioma como propriedade
 }
