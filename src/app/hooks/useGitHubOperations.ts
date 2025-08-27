@@ -66,10 +66,16 @@ export const useGitHubOperations = (githubService: GitHubService) => {
     }
 
     const handleUnfollowAll = async (token: string, language: SupportedLanguages) => {
+        // processa em paralelo em lotes para acelerar e evitar rate limit agressivo
+        const users = [...nonFollowers]
+        const batchSize = 6
         setIsSearching(true)
         try {
-            for (const user of nonFollowers) {
-                await handleUnfollow(user.login, token, language)
+            for (let i = 0; i < users.length; i += batchSize) {
+                const batch = users.slice(i, i + batchSize)
+                await Promise.allSettled(
+                    batch.map(u => handleUnfollow(u.login, token, language))
+                )
             }
         } finally {
             setIsSearching(false)
@@ -77,10 +83,16 @@ export const useGitHubOperations = (githubService: GitHubService) => {
     }
 
     const handleFollowAll = async (token: string, language: SupportedLanguages) => {
+        // processa em paralelo em lotes para acelerar e evitar rate limit agressivo
+        const users = [...nonFollowing]
+        const batchSize = 6
         setIsSearching(true)
         try {
-            for (const user of nonFollowing) {
-                await handleFollow(user.login, token, language)
+            for (let i = 0; i < users.length; i += batchSize) {
+                const batch = users.slice(i, i + batchSize)
+                await Promise.allSettled(
+                    batch.map(u => handleFollow(u.login, token, language))
+                )
             }
         } finally {
             setIsSearching(false)
