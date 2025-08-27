@@ -4,6 +4,19 @@ import {User} from '../interfaces/User'
 
 export class GitHubServiceImpl implements GitHubService {
     private readonly baseUrl="https://api.github.com";
+    private readonly defaultHeaders = {
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'User-Agent': 'unfollowNonFollowers-app',
+    } as const
+    private withAuth(token: string) {
+        return { ...this.defaultHeaders, Authorization: `token ${token}` }
+    }
+    private withTimeout(ms = 20000) {
+        const controller = new AbortController()
+        const id = setTimeout(() => controller.abort(), ms)
+        return { controller, id }
+    }
 
     async fetchAllPages<T>(url: string,token: string,language: SupportedLanguages): Promise<T[]> {
         let results: T[]=[] // Rewritten line
@@ -12,12 +25,12 @@ export class GitHubServiceImpl implements GitHubService {
 
         try {
             while(hasMorePages) {
-                const response=await fetch(`${url}?per_page=100&page=${currentPage}`,{
-                    headers: {Authorization: `token ${token}`},
-                })
+                const { controller, id } = this.withTimeout()
+                const response=await fetch(`${url}?per_page=100&page=${currentPage}`,{ headers: this.withAuth(token), signal: controller.signal })
+                clearTimeout(id)
                 if(!response.ok) {
-                    if(response.status==401){
-                        throw new Error(translations[language].httpErrorMessage[response.status].join('\n'))
+                    if (translations[language].httpErrorMessage[response.status as 401|403|404|500]) {
+                        throw new Error(translations[language].httpErrorMessage[response.status as 401|403|404|500]!.join('\n'))
                     }
                     throw new Error(translations[language].catchErrorMessage.fetchOnePage({currentPage,status:response.status,statusText:response.statusText}))
                 }
@@ -31,7 +44,7 @@ export class GitHubServiceImpl implements GitHubService {
 
                 currentPage++
             }
-        } catch(error) {
+    } catch(error) {
             console.error('Erro ao buscar páginas:',error)
             if(error instanceof Error) {
                 throw new Error(translations[language].catchErrorMessage.fetchManyPages({message:error.message}))
@@ -107,18 +120,16 @@ export class GitHubServiceImpl implements GitHubService {
 
     async unfollowUser(usernameToUnfollow: string,token: string,language:SupportedLanguages): Promise<boolean> {
         try {
-            const response=await fetch(`${this.baseUrl}/user/following/${usernameToUnfollow}`,{
-                method: 'DELETE',
-                headers: {Authorization: `token ${token}`},
-            })
+            const { controller, id } = this.withTimeout()
+            const response=await fetch(`${this.baseUrl}/user/following/${usernameToUnfollow}`,{ method: 'DELETE', headers: this.withAuth(token), signal: controller.signal })
+            clearTimeout(id)
 
 
             if(!response.ok) {
-                // console.error(`Erro ao deixar de seguir ${usernameToUnfollow}: ${response.status} - ${response.statusText}`)
-                if (response.status === 403) {
-                    throw new Error(translations[language].httpErrorMessage[403]?.join('\n') || 'Acesso proibido.');
+                if (translations[language].httpErrorMessage[response.status as 401|403|404|500]) {
+                    throw new Error(translations[language].httpErrorMessage[response.status as 401|403|404|500]!.join('\n'))
                 }
-                return false
+                throw new Error(translations[language].catchErrorMessage.unfollowUser({username:usernameToUnfollow,message:`${response.status} ${response.statusText}`}))
             }
 
             return true
@@ -134,14 +145,15 @@ export class GitHubServiceImpl implements GitHubService {
 
     async followUser(usernameToFollow: string,token: string,language:SupportedLanguages): Promise<boolean> {
         try {
-            const response=await fetch(`${this.baseUrl}/user/following/${usernameToFollow}`,{
-                method: 'PUT',
-                headers: {Authorization: `token ${token}`},
-            })
+            const { controller, id } = this.withTimeout()
+            const response=await fetch(`${this.baseUrl}/user/following/${usernameToFollow}`,{ method: 'PUT', headers: this.withAuth(token), signal: controller.signal })
+            clearTimeout(id)
 
             if(!response.ok) {
-                console.error(`Erro ao seguir ${usernameToFollow}: ${response.status} - ${response.statusText}`)
-                return false
+                if (translations[language].httpErrorMessage[response.status as 401|403|404|500]) {
+                    throw new Error(translations[language].httpErrorMessage[response.status as 401|403|404|500]!.join('\n'))
+                }
+                throw new Error(translations[language].catchErrorMessage.followUser({username:usernameToFollow,message:`${response.status} ${response.statusText}`}))
             }
 
             return true

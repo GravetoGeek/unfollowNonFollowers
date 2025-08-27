@@ -1,4 +1,5 @@
-import React from 'react'
+"use client"
+import React, { useEffect } from 'react'
 import {SupportedLanguages,translations} from '../../constants/translations'
 import styles from './Modal.module.css'
 interface ModalProps {
@@ -14,11 +15,20 @@ export default function Modal({ message, onClose, language }: ModalProps) {
         }
     };
 
+    useEffect(() => {
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') onClose()
+        }
+        window.addEventListener('keydown', onKeyDown)
+        return () => window.removeEventListener('keydown', onKeyDown)
+    }, [onClose])
+
     return (
-        <div className={styles.modalOverlay} onClick={handleOverlayClick}>
+        <div className={styles.modalOverlay} onClick={handleOverlayClick} role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-desc">
             <div className={styles.modal}>
-                <p>{message}</p>
-                <button onClick={onClose} className={styles.closeButton}>
+                <h2 id="modal-title" className="sr-only">{translations[language].close}</h2>
+                <p id="modal-desc">{message}</p>
+                <button type="button" onClick={onClose} className={styles.closeButton}>
                     {translations[language].close}
                 </button>
             </div>

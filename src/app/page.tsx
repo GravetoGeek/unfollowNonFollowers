@@ -162,7 +162,7 @@ export default function HomePage() {
                         language={language} // Passa o idioma selecionado
                     />
                 )}
-                <div className={styles.ctas}>
+                <form className={styles.ctas} onSubmit={(e)=>{ e.preventDefault(); void handleSearch(); }}>
                     <select
                         id="language-select"
                         value={language}
@@ -179,6 +179,7 @@ export default function HomePage() {
 
                     <div className={styles.inputContainer}>
                         <div className={styles.inputGroup}>
+                            <label htmlFor="username-input" className="sr-only">{translations[language].githubUsername}</label>
                             <input
                                 id="username-input"
                                 type="text"
@@ -188,6 +189,7 @@ export default function HomePage() {
                                 className={styles.input}
                             />
                             <button
+                                type="button"
                                 id="clear-username-button"
                                 onClick={handleClearUsername}
                                 className={styles.clearButton}
@@ -196,6 +198,7 @@ export default function HomePage() {
                             </button>
                         </div>
                         <div className={styles.inputGroup}>
+                            <label htmlFor="api-key-input" className="sr-only">{translations[language].githubApiKey}</label>
                             <input
                                 id="api-key-input"
                                 type={showApiKey ? "text" : "password"}
@@ -215,6 +218,7 @@ export default function HomePage() {
                                 {showApiKey ? '🙈' : '👁️'}
                             </button>
                             <button
+                                type="button"
                                 id="clear-api-key-button"
                                 onClick={handleClearApiKey}
                                 className={styles.clearButton}
@@ -235,11 +239,12 @@ export default function HomePage() {
                     </a>
 
                     <div className={styles.buttonGroup}>
-                        <button onClick={handleSearch} className={styles.button} disabled={isSearching}>
+                        <button type="submit" className={styles.button} disabled={isSearching}>
                             {isSearching && <span className="spinner" aria-hidden="true" />}
                             <span>{isSearching ? translations[language].searching : translations[language].search}</span>
                         </button>
                         <button
+                            type="button"
                             onClick={handleUnfollowAllClick}
                             className={styles.button}
                             disabled={isUnfollowingUser !== "" || nonFollowers.length === 0}
@@ -252,6 +257,7 @@ export default function HomePage() {
                             </span>
                         </button>
                         <button
+                            type="button"
                             onClick={handleFollowAllClick}
                             className={styles.button}
                             disabled={isFollowingUser !== "" || nonFollowing.length === 0}
@@ -264,7 +270,10 @@ export default function HomePage() {
                             </span>
                         </button>
                     </div>
-                </div>
+                    <div aria-live="polite" className="sr-only">
+                        {isSearching ? translations[language].searching : ''}
+                    </div>
+                </form>
 
                 <div className={styles.listsContainer}>
                     <section className={styles.listSection}>
