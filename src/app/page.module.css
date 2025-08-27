@@ -1,4 +1,5 @@
 .page {
+    width: 100%;
     --gray-rgb: 0, 0, 0;
     --gray-alpha-200: rgba(var(--gray-rgb), 0.08);
     --gray-alpha-100: rgba(var(--gray-rgb), 0.05);
@@ -10,7 +11,7 @@
     padding: var(--padding-mobile);
     gap: 64px;
     font-family: var(--font-geist-sans);
-    background-color: var(--background);
+    background-color: transparent;
     color: var(--foreground);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
     padding: 20px;
@@ -33,12 +34,13 @@
     gap: 2rem;
     grid-row-start: 2;
     width: 100%;
-    max-width: var(--max-width-mobile);
+    max-width: 100%;
     margin: 0 auto;
     padding: var(--padding-mobile);
-    background-color: var(--background);
+    background-color: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 10px 30px rgba(2, 6, 23, 0.15);
 }
 
 .main ol {
@@ -123,26 +125,36 @@ a.secondary {
     min-height: 48px;
     padding: 0.875rem 1rem;
     border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
+    border-radius: var(--radius-lg);
     font-size: 1rem;
-    background: var(--background);
+    background: var(--card-bg);
     color: var(--foreground);
 }
 
 .input::placeholder {
-    color: #666;
+    color: var(--input-placeholder-color);
+}
+
+.input:focus-visible {
+    outline: none;
+    border-color: var(--brand-500);
+    box-shadow: var(--focus-ring);
 }
 
 .button {
     width: 100%;
-    padding: 0.875rem;
+    padding: 0.875rem 1rem;
     background-color: var(--button-primary);
     color: var(--button-text);
     border: 1px solid var(--button-border);
-    border-radius: var(--border-radius);
+    border-radius: var(--radius-lg);
     font-size: 1rem;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
 .button:hover:not(:disabled) {
@@ -152,6 +164,11 @@ a.secondary {
 .button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.button:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
 }
 
 .list {
@@ -169,9 +186,10 @@ a.secondary {
     align-items: center;
     gap: 0.75rem;
     padding: 0.75rem;
-    background: var(--background);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
+    background: var(--card-bg);
+    border: none;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 0 0 1px var(--border-color) inset;
 }
 
 .listItem:last-child {
@@ -199,11 +217,12 @@ a.secondary {
     padding-right: 40px; /* Adiciona espaço para o botão embutido */
 }
 
-.inputGroup .clearButton {
+.inputGroup .clearButton,
+.inputGroup .toggleButton {
     flex-shrink: 0;
     position: absolute;
     top: 50%;
-    right: 10px; /* Posiciona o botão no canto direito do input */
+    right: 10px; /* default para clear */
     transform: translateY(-50%);
     background: none;
     border: none;
@@ -213,6 +232,10 @@ a.secondary {
     margin-left: 8px;
     padding: 5px; /* Adiciona um pouco de espaço ao redor do ícone */
     /* border-radius: 50%; Torna o botão circular */
+}
+
+.inputGroup .toggleButton {
+    right: 44px; /* posiciona toggle antes do clear */
 }
 
 .clearButton {
@@ -239,6 +262,28 @@ a.secondary {
 
 .clearButton:hover {
     color: rgba(36, 35, 35, 0.966); /* Muda a cor para vermelho ao passar o mouse */
+}
+
+.linkButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    color: var(--foreground);
+    background: transparent;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.linkButton:hover {
+    border-color: var(--brand-500);
+}
+
+.linkButton:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
 }
 
 /* Enable hover only on non-touch devices */
@@ -302,7 +347,7 @@ a.secondary {
 
 @media (min-width: 640px) {
     .main {
-        max-width: var(--max-width-tablet);
+    max-width: 100%;
         padding: var(--padding-tablet);
     }
 
@@ -338,9 +383,7 @@ a.secondary {
         margin-bottom: 0.5rem;
     }
 
-    .buttonGroup button {
-        width: 100%;
-    }
+    .buttonGroup button { width: 100%; }
 
     /* O select e o link ocupam toda a largura */
     .ctas select,
@@ -351,14 +394,14 @@ a.secondary {
 
 @media (min-width: 1024px) {
     .main {
-        max-width: var(--max-width-desktop);
+    max-width: 100%;
         padding: var(--padding-desktop);
         gap: 3rem;
     }
 
     .ctas {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr);
         gap: 2rem;
     }
 
@@ -379,8 +422,8 @@ a.secondary {
     /* O link para API key ocupa uma coluna inteira */
     .ctas a {
         grid-column: span 2;
-        width: fit-content;
-        margin: 0 auto;
+        width: 100%;
+        margin: 0;
     }
 
     /* Os botões de ação ficam em uma linha com 3 colunas */
@@ -393,9 +436,7 @@ a.secondary {
         width: 100%;
     }
 
-    .ctas .button {
-        min-width: 200px;
-    }
+    .ctas .button { width: 100%; }
 
     /* Layout das listas em duas colunas */
     .lists-container {
