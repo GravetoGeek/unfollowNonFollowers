@@ -13,6 +13,7 @@ import {GitHubServiceImpl} from './services/GitHubService'
 export default function HomePage() {
     const [username, setUsername] = useState("");
     const [apiKey, setApiKey] = useState("");
+    const [showApiKey, setShowApiKey] = useState(false);
     const [language, setLanguage] = useState<SupportedLanguages>("pt");
     const [modalMessage, setModalMessage] = useState<string | null>(null);
     const [confirmationMessage, setConfirmationMessage] = useState<string | null>(null);
@@ -197,16 +198,27 @@ export default function HomePage() {
                         <div className={styles.inputGroup}>
                             <input
                                 id="api-key-input"
-                                type="text"
+                                type={showApiKey ? "text" : "password"}
                                 placeholder={translations[language].githubApiKey}
                                 value={apiKey}
                                 onChange={(e) => setApiKey(e.target.value)}
                                 className={styles.input}
+                                autoComplete="current-password"
                             />
+                            <button
+                                type="button"
+                                aria-label={showApiKey ? 'Ocultar chave' : 'Mostrar chave'}
+                                onClick={() => setShowApiKey(v => !v)}
+                                className={styles.toggleButton}
+                                title={showApiKey ? 'Ocultar' : 'Mostrar'}
+                            >
+                                {showApiKey ? '🙈' : '👁️'}
+                            </button>
                             <button
                                 id="clear-api-key-button"
                                 onClick={handleClearApiKey}
                                 className={styles.clearButton}
+                                aria-label="Limpar chave API"
                             >
                                 ✕
                             </button>
@@ -217,31 +229,39 @@ export default function HomePage() {
                         href={`https://github.com/settings/personal-access-tokens`}
                         target="_blank"
                         rel="noreferrer"
+                        className={styles.linkButton}
                     >
                         {translations[language].getApiKey}
                     </a>
 
                     <div className={styles.buttonGroup}>
                         <button onClick={handleSearch} className={styles.button} disabled={isSearching}>
-                            {isSearching ? translations[language].searching : translations[language].search}
+                            {isSearching && <span className="spinner" aria-hidden="true" />}
+                            <span>{isSearching ? translations[language].searching : translations[language].search}</span>
                         </button>
                         <button
                             onClick={handleUnfollowAllClick}
                             className={styles.button}
                             disabled={isUnfollowingUser !== "" || nonFollowers.length === 0}
                         >
-                            {isUnfollowingUser !== ""
-                                ? translations[language].unfollowingAll
-                                : translations[language].unfollowAll}
+                            {isUnfollowingUser !== "" && <span className="spinner" aria-hidden="true" />}
+                            <span>
+                                {isUnfollowingUser !== ""
+                                    ? translations[language].unfollowingAll
+                                    : translations[language].unfollowAll}
+                            </span>
                         </button>
                         <button
                             onClick={handleFollowAllClick}
                             className={styles.button}
                             disabled={isFollowingUser !== "" || nonFollowing.length === 0}
                         >
-                            {isFollowingUser !== ""
-                                ? translations[language].followingAll
-                                : translations[language].followAll}
+                            {isFollowingUser !== "" && <span className="spinner" aria-hidden="true" />}
+                            <span>
+                                {isFollowingUser !== ""
+                                    ? translations[language].followingAll
+                                    : translations[language].followAll}
+                            </span>
                         </button>
                     </div>
                 </div>
