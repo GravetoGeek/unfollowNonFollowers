@@ -176,7 +176,7 @@ export default function HomePage() {
                 <form className={styles.ctas} onSubmit={(e)=>{ e.preventDefault(); void handleSearch(); }}>
                     <div style={{display:'flex',gap:8,alignItems:'center'}}>
                         <label className="sr-only">Tema primário</label>
-                        <select value={primaryVariant} onChange={(e)=> setPrimaryVariant(e.target.value as 'success'|'violet')} className={styles.input}>
+                        <select value={primaryVariant} onChange={(e)=> setPrimaryVariant(e.target.value as 'success'|'violet')} className={`${styles.input} ${styles.halfSelect}`}>
                             <option value="success">Verde (padrão)</option>
                             <option value="violet">Roxo</option>
                         </select>
@@ -185,7 +185,7 @@ export default function HomePage() {
                         id="language-select"
                         value={language}
                         onChange={(e) => setLanguage(e.target.value as SupportedLanguages)}
-                        className={styles.input}
+                        className={`${styles.input} ${styles.halfSelect}`}
                     >
                         <option value="pt">Português</option>
                         <option value="en">English</option>

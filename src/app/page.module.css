@@ -516,12 +516,44 @@ a.secondary {
         margin-bottom: 1rem;
     }
 
+    /* Classe utilitária para selects que devem ocupar metade da largura em telas grandes */
+    .halfSelect {
+        width: 100%;
+        grid-column: 1 / -1; /* por default ocupa toda a largura */
+        box-sizing: border-box;
+    }
+
     /* O link para API key ocupa toda a largura */
     .ctas a {
         grid-column: 1 / -1;
         width: 100%;
         text-align: center;
         margin: 1rem 0;
+    }
+
+    /* Em desktops, metade da largura e ocupa só uma coluna */
+    @media (min-width: 1024px) {
+        .halfSelect {
+            width: 50%;
+            grid-column: span 1;
+            max-width: none;
+        }
+    }
+
+    /* Especificidade maior para garantir que selects com .halfSelect fiquem lado a lado dentro de .ctas */
+    .ctas .halfSelect {
+        display: inline-block;
+        width: 100%;
+        grid-column: auto !important;
+        vertical-align: middle;
+        box-sizing: border-box;
+    }
+
+    @media (min-width: 1024px) {
+        .ctas .halfSelect {
+            width: 100%; /* ocupar toda a célula do grid */
+            display: block;
+        }
     }
 }
 
