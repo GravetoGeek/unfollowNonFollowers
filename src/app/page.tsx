@@ -15,6 +15,9 @@ export default function HomePage() {
     const [apiKey, setApiKey] = useState("");
     const [showApiKey, setShowApiKey] = useState(false);
     const [language, setLanguage] = useState<SupportedLanguages>("pt");
+    const [primaryVariant, setPrimaryVariant] = useState<'success'|'violet'>(() => {
+        try { return (localStorage.getItem('primaryVariant') as 'success'|'violet') || 'success' } catch { return 'success' }
+    });
     const [modalMessage, setModalMessage] = useState<string | null>(null);
     const [confirmationMessage, setConfirmationMessage] = useState<string | null>(null);
     const [onConfirm, setOnConfirm] = useState<(() => Promise<void>) | null>(null);
@@ -61,6 +64,12 @@ export default function HomePage() {
             localStorage.setItem("githubApiKey", apiKey);
         }
     }, [apiKey]);
+
+    useEffect(() => {
+        try { localStorage.setItem('primaryVariant', primaryVariant) } catch {}
+        // apply data attribute on body for CSS hooks if needed
+        document.documentElement.setAttribute('data-primary-variant', primaryVariant)
+    }, [primaryVariant])
 
     // Função para limpar a chave da API
     const handleClearApiKey=() => {
@@ -165,6 +174,13 @@ export default function HomePage() {
                     />
                 )}
                 <form className={styles.ctas} onSubmit={(e)=>{ e.preventDefault(); void handleSearch(); }}>
+                    <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                        <label className="sr-only">Tema primário</label>
+                        <select value={primaryVariant} onChange={(e)=> setPrimaryVariant(e.target.value as 'success'|'violet')} className={styles.input}>
+                            <option value="success">Verde (padrão)</option>
+                            <option value="violet">Roxo</option>
+                        </select>
+                    </div>
                     <select
                         id="language-select"
                         value={language}
