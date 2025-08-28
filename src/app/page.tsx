@@ -25,9 +25,11 @@ export default function HomePage() {
         nonFollowing,
         unfollowedUsers,
         followingUsers,
-        isSearching,
-        isUnfollowingUser,
-        isFollowingUser,
+    isSearching,
+    isUnfollowingAny,
+    isFollowingAny,
+    isUnfollowingUser,
+    isFollowingUser,
         handleSearchNonFollowers,
         handleUnfollow,
         handleFollow,
@@ -247,11 +249,11 @@ export default function HomePage() {
                             type="button"
                             onClick={handleUnfollowAllClick}
                             className={styles.button}
-                            disabled={isUnfollowingUser !== "" || nonFollowers.length === 0}
+                            disabled={isUnfollowingAny || nonFollowers.length === 0}
                         >
-                            {isUnfollowingUser !== "" && <span className="spinner" aria-hidden="true" />}
+                            {isUnfollowingAny && <span className="spinner" aria-hidden="true" />}
                             <span>
-                                {isUnfollowingUser !== ""
+                                {isUnfollowingAny
                                     ? translations[language].unfollowingAll
                                     : translations[language].unfollowAll}
                             </span>
@@ -260,11 +262,11 @@ export default function HomePage() {
                             type="button"
                             onClick={handleFollowAllClick}
                             className={styles.button}
-                            disabled={isFollowingUser !== "" || nonFollowing.length === 0}
+                            disabled={isFollowingAny || nonFollowing.length === 0}
                         >
-                            {isFollowingUser !== "" && <span className="spinner" aria-hidden="true" />}
+                            {isFollowingAny && <span className="spinner" aria-hidden="true" />}
                             <span>
-                                {isFollowingUser !== ""
+                                {isFollowingAny
                                     ? translations[language].followingAll
                                     : translations[language].followAll}
                             </span>
@@ -285,8 +287,8 @@ export default function HomePage() {
                                     user={user}
                                     onUnfollow={handleUnfollowClick}
                                     onFollow={handleFollowClick}
-                                    isUnfollowing={isUnfollowingUser === user.login}
-                                    isFollowing={isFollowingUser === user.login}
+                                    isUnfollowing={isUnfollowingUser(user.login)}
+                                    isFollowing={isFollowingUser(user.login)}
                                     hasUnfollowed={unfollowedUsers.includes(user.login)}
                                     isCurrentlyFollowing={!unfollowedUsers.includes(user.login)} // Alterado aqui
                                     language={language}
@@ -309,7 +311,7 @@ export default function HomePage() {
                                     onUnfollow={() => {}} // Unfollow action is not relevant here
                                     onFollow={handleFollowClick}
                                     isUnfollowing={false}
-                                    isFollowing={isFollowingUser === user.login}
+                                    isFollowing={isFollowingUser(user.login)}
                                     hasUnfollowed={false}
                                     isCurrentlyFollowing={followingUsers.includes(user.login)}
                                     language={language} // Passa o idioma selecionado

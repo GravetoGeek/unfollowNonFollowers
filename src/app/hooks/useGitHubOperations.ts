@@ -1,7 +1,7 @@
-import {useState} from 'react'
-import {SupportedLanguages,translations} from '../constants/translations'
-import {GitHubService} from '../interfaces/GitHubService'
-import {User} from '../interfaces/User'
+import { useCallback, useState } from 'react'
+import { SupportedLanguages, translations } from '../constants/translations'
+import { GitHubService } from '../interfaces/GitHubService'
+import { User } from '../interfaces/User'
 
 export const useGitHubOperations = (githubService: GitHubService) => {
     const [nonFollowers, setNonFollowers] = useState<User[]>([])
@@ -9,8 +9,13 @@ export const useGitHubOperations = (githubService: GitHubService) => {
     const [unfollowedUsers, setUnfollowedUsers] = useState<string[]>([])
     const [followingUsers, setFollowingUsers] = useState<string[]>([])
     const [isSearching, setIsSearching] = useState(false)
-    const [isUnfollowingUser, setIsUnfollowingUser] = useState("")
-    const [isFollowingUser, setIsFollowingUser] = useState("")
+    // conjuntos de usuários sendo processados em paralelo
+    const [unfollowingSet, setUnfollowingSet] = useState<Set<string>>(new Set())
+    const [followingSet, setFollowingSet] = useState<Set<string>>(new Set())
+    const isUnfollowingAny = unfollowingSet.size > 0
+    const isFollowingAny = followingSet.size > 0
+    const isUnfollowingUser = useCallback((login: string) => unfollowingSet.has(login), [unfollowingSet])
+    const isFollowingUser = useCallback((login: string) => followingSet.has(login), [followingSet])
 
     const handleSearchNonFollowers = async (username: string, token: string, language: SupportedLanguages) => {
         if (!username || !token) {
@@ -21,7 +26,7 @@ export const useGitHubOperations = (githubService: GitHubService) => {
         try {
             const [nonFollowersResult, nonFollowingResult] = await Promise.all([
                 githubService.fetchNonFollowers(username, token, language),
-                githubService.fetchNonFollowing(username, token,language)
+                githubService.fetchNonFollowing(username, token, language)
             ])
 
             setNonFollowers(nonFollowersResult)
@@ -32,7 +37,11 @@ export const useGitHubOperations = (githubService: GitHubService) => {
     }
 
     const handleUnfollow = async (userLogin: string, token: string, language: SupportedLanguages) => {
-        setIsUnfollowingUser(userLogin)
+        setUnfollowingSet(prev => {
+            const next = new Set(prev)
+            next.add(userLogin)
+            return next
+        })
         try {
             const success = await githubService.unfollowUser(userLogin, token, language)
             if (success) {
@@ -44,12 +53,20 @@ export const useGitHubOperations = (githubService: GitHubService) => {
             console.error(error)
             throw new Error(translations[language].httpErrorMessage[401].join('\n'));
         } finally {
-            setIsUnfollowingUser("")
+            setUnfollowingSet(prev => {
+                const next = new Set(prev)
+                next.delete(userLogin)
+                return next
+            })
         }
     }
 
     const handleFollow = async (userLogin: string, token: string, language: SupportedLanguages) => {
-        setIsFollowingUser(userLogin)
+        setFollowingSet(prev => {
+            const next = new Set(prev)
+            next.add(userLogin)
+            return next
+        })
         try {
             const success = await githubService.followUser(userLogin, token, language)
             if (success) {
@@ -61,7 +78,11 @@ export const useGitHubOperations = (githubService: GitHubService) => {
             console.error(error)
             throw new Error(translations[language].httpErrorMessage[401].join('\n'));
         } finally {
-            setIsFollowingUser("")
+            setFollowingSet(prev => {
+                const next = new Set(prev)
+                next.delete(userLogin)
+                return next
+            })
         }
     }
 
@@ -105,6 +126,8 @@ export const useGitHubOperations = (githubService: GitHubService) => {
         unfollowedUsers,
         followingUsers,
         isSearching,
+        isUnfollowingAny,
+        isFollowingAny,
         isUnfollowingUser,
         isFollowingUser,
         handleSearchNonFollowers,
