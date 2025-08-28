@@ -23,9 +23,9 @@
     --border-color: #e2e8f0; /* slate-200 */
     --card-bg: #ffffff;
 
-    /* Buttons map to brand */
-    --button-primary: var(--success-500);
-    --button-primary-hover: var(--success-600);
+    /* Buttons (violet) */
+    --button-primary: #8b5cf6; /* violet-500 */
+    --button-primary-hover: #7c3aed; /* violet-600 */
     --button-text: #ffffff;
     --button-border: transparent;
 
@@ -61,8 +61,8 @@
         --border-color: #1f2a44;
         --card-bg: #0f172a;
 
-        --button-primary: #2563eb;
-        --button-primary-hover: #1d4ed8;
+    --button-primary: #7c3aed; /* violet-600 */
+    --button-primary-hover: #6d28d9; /* violet-700 */
         --button-text: #e2e8f0;
         --button-border: rgba(226, 232, 240, 0.1);
         --gray-alpha-100: rgba(255, 255, 255, 0.06);
