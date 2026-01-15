@@ -224,34 +224,36 @@ export default function HomePage() {
                                     d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" /></svg>)}
                         </button>
 
-                        {/* Primary Variant Select */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <label className="sr-only">Tema primário</label>
+                        <div className={styles.themeSelectorGroup}>
+                             {/* Primary Variant Select */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <label className="sr-only">Tema primário</label>
+                                <select
+                                    value={primaryVariant}
+                                    onChange={(e) => setPrimaryVariant(e.target.value as 'success' | 'violet')}
+                                    className={`${styles.input} ${styles.halfSelect}`}
+                                    style={{ width: 'auto' }}
+                                >
+                                    <option value="success">Verde</option>
+                                    <option value="violet">Roxo</option>
+                                </select>
+                            </div>
+
+                            {/* Language Select */}
                             <select
-                                value={primaryVariant}
-                                onChange={(e) => setPrimaryVariant(e.target.value as 'success' | 'violet')}
-                                className={`${styles.input} ${styles.halfSelect}`}
-                                style={{ width: 'auto' }}
+                                id="language-select"
+                                value={language}
+                                onChange={(e) => setLanguage(e.target.value as SupportedLanguages)}
+                                className={styles.input}
                             >
-                                <option value="success">Verde</option>
-                                <option value="violet">Roxo</option>
+                                <option value="pt">Português</option>
+                                <option value="en">English</option>
+                                <option value="zh">中文</option>
+                                <option value="hi">हिन्दी</option>
+                                <option value="ar">العربية</option>
+                                <option value="ja">日本語</option>
                             </select>
                         </div>
-
-                        {/* Language Select */}
-                        <select
-                            id="language-select"
-                            value={language}
-                            onChange={(e) => setLanguage(e.target.value as SupportedLanguages)}
-                            className={styles.input}
-                        >
-                            <option value="pt">Português</option>
-                            <option value="en">English</option>
-                            <option value="zh">中文</option>
-                            <option value="hi">हिन्दी</option>
-                            <option value="ar">العربية</option>
-                            <option value="ja">日本語</option>
-                        </select>
                     </div>
 
                     <div className={styles.inputContainer}>
@@ -292,7 +294,11 @@ export default function HomePage() {
                                 className={styles.toggleButton}
                                 title={showApiKey ? 'Ocultar' : 'Mostrar'}
                             >
-                                {showApiKey ? '🙈' : '👁️'}
+                                {showApiKey ? (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                )}
                             </button>
                             <button
                                 type="button"
