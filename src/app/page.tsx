@@ -1,38 +1,41 @@
 "use client"
 
 import parse from 'html-react-parser'
-import {useEffect,useState} from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import ConfirmationModal from './components/Modal/ConfirmationModal'
 import Modal from './components/Modal/Modal'
-import {UserCard} from './components/UserCard/UserCard'
-import {SupportedLanguages,translations} from './constants/translations'
-import {useGitHubOperations} from './hooks/useGitHubOperations'
+import { UserCard } from './components/UserCard/UserCard'
+import { SupportedLanguages, translations } from './constants/translations'
+import { useGitHubOperations } from './hooks/useGitHubOperations'
 import styles from './page.module.css'
-import {GitHubServiceImpl} from './services/GitHubService'
+import { GitHubServiceImpl } from './services/GitHubService'
 
 export default function HomePage() {
     const [username, setUsername] = useState("");
     const [apiKey, setApiKey] = useState("");
     const [showApiKey, setShowApiKey] = useState(false);
     const [language, setLanguage] = useState<SupportedLanguages>("pt");
-    const [primaryVariant, setPrimaryVariant] = useState<'success'|'violet'>(() => {
-        try { return (localStorage.getItem('primaryVariant') as 'success'|'violet') || 'success' } catch { return 'success' }
+    const [primaryVariant, setPrimaryVariant] = useState<'success' | 'violet'>(() => {
+        try { return (localStorage.getItem('primaryVariant') as 'success' | 'violet') || 'success' } catch { return 'success' }
     });
     const [modalMessage, setModalMessage] = useState<string | null>(null);
     const [confirmationMessage, setConfirmationMessage] = useState<string | null>(null);
     const [onConfirm, setOnConfirm] = useState<(() => Promise<void>) | null>(null);
+    const [theme, setTheme] = useState<"light" | "dark">("light")
+    const [stats, setStats] = useState<{ visitors: number, lastUsers: string[] }>({ visitors: 0, lastUsers: [] })
 
-    const githubOperations = useGitHubOperations(new GitHubServiceImpl());
+    const gitHubService = useMemo(() => new GitHubServiceImpl(), [])
+    const githubOperations = useGitHubOperations(gitHubService)
     const {
         nonFollowers,
         nonFollowing,
         unfollowedUsers,
         followingUsers,
-    isSearching,
-    isUnfollowingAny,
-    isFollowingAny,
-    isUnfollowingUser,
-    isFollowingUser,
+        isSearching,
+        isUnfollowingAny,
+        isFollowingAny,
+        isUnfollowingUser,
+        isFollowingUser,
         handleSearchNonFollowers,
         handleUnfollow,
         handleFollow,
@@ -40,111 +43,142 @@ export default function HomePage() {
         handleFollowAll
     } = githubOperations
 
+    // Carregar tema
+    useEffect(() => {
+        const storedTheme = localStorage.getItem("theme") as "light" | "dark" | null
+        if (storedTheme) {
+            setTheme(storedTheme)
+            document.documentElement.setAttribute("data-theme", storedTheme)
+        } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+            setTheme("dark")
+        }
+    }, [])
+
+    const toggleTheme = () => {
+        const newTheme = theme === "light" ? "dark" : "light"
+        setTheme(newTheme)
+        localStorage.setItem("theme", newTheme)
+        document.documentElement.setAttribute("data-theme", newTheme)
+    }
+
     // Carregar o nome do usuário e a chave da API do localStorage ao inicializar
     useEffect(() => {
-        const storedUsername = localStorage.getItem("githubUsername");
-        const storedApiKey = localStorage.getItem("githubApiKey");
+        const storedUsername = localStorage.getItem("githubUsername")
+        const storedApiKey = localStorage.getItem("githubApiKey")
         if (storedUsername) {
-            setUsername(storedUsername);
+            setUsername(storedUsername)
         }
         if (storedApiKey) {
-            setApiKey(storedApiKey);
+            setApiKey(storedApiKey)
         }
-    }, []);
+
+        // Fetch stats
+        fetch('/api/stats')
+            .then(res => res.json())
+            .then(data => setStats(data))
+            .catch(console.error)
+    }, [])
 
     // Atualizar o localStorage sempre que o nome do usuário ou a chave da API mudar
     useEffect(() => {
         if (username) {
-            localStorage.setItem("githubUsername", username);
+            localStorage.setItem("githubUsername", username)
         }
-    }, [username]);
+    }, [username])
 
     useEffect(() => {
         if (apiKey) {
-            localStorage.setItem("githubApiKey", apiKey);
+            localStorage.setItem("githubApiKey", apiKey)
         }
-    }, [apiKey]);
+    }, [apiKey])
 
     useEffect(() => {
-        try { localStorage.setItem('primaryVariant', primaryVariant) } catch {}
-        // apply data attribute on body for CSS hooks if needed
+        try { localStorage.setItem('primaryVariant', primaryVariant) } catch { }
         document.documentElement.setAttribute('data-primary-variant', primaryVariant)
     }, [primaryVariant])
 
-    // Função para limpar a chave da API
-    const handleClearApiKey=() => {
+    const handleClearApiKey = () => {
         setApiKey("")
         localStorage.removeItem("githubApiKey")
     }
 
     const handleClearUsername = () => {
-        setUsername("");
-        localStorage.removeItem("githubUsername");
-    };
+        setUsername("")
+        localStorage.removeItem("githubUsername")
+    }
 
     const handleSearch = async () => {
         if (!username || !apiKey) {
-            setModalMessage(translations[language].errorMissingCredentials); // Define a mensagem do modal
-            return;
+            setModalMessage(translations[language].errorMissingCredentials)
+            return
         }
         try {
-            await handleSearchNonFollowers(username, apiKey, language);
+            await handleSearchNonFollowers(username, apiKey, language)
+            // Update stats after search
+            fetch('/api/stats', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username })
+            })
+                .then(res => res.json())
+                .then(data => setStats(data))
+                .catch(console.error)
         } catch (error) {
-            setModalMessage(error instanceof Error ? error.message : "An error occurred");
+            setModalMessage(error instanceof Error ? error.message : "An error occurred")
         }
     }
 
     const handleUnfollowClick = async (userLogin: string) => {
         try {
-            await handleUnfollow(userLogin, apiKey, language);
+            await handleUnfollow(userLogin, apiKey, language)
         } catch (error) {
-            setModalMessage(error instanceof Error ? error.message : "An error occurred");
+            setModalMessage(error instanceof Error ? error.message : "An error occurred")
         }
     }
 
     const handleFollowClick = async (userLogin: string) => {
         try {
-            await handleFollow(userLogin, apiKey, language);
+            await handleFollow(userLogin, apiKey, language)
         } catch (error) {
-            setModalMessage(error instanceof Error ? error.message : "An error occurred");
+            setModalMessage(error instanceof Error ? error.message : "An error occurred")
         }
     }
 
     const handleUnfollowAllClick = () => {
         if (!apiKey) {
-            setModalMessage(translations[language].errorMissingCredentials);
-            return;
+            setModalMessage(translations[language].errorMissingCredentials)
+            return
         }
 
-        setConfirmationMessage(translations[language].confirmUnfollowAll);
+        setConfirmationMessage(translations[language].confirmUnfollowAll)
         setOnConfirm(() => async () => {
             try {
-                await handleUnfollowAll(apiKey, language);
-                await setConfirmationMessage(null);
-                await setOnConfirm(null); // Limpa o estado após a execução
+                await handleUnfollowAll(apiKey, language)
+                await setConfirmationMessage(null)
+                await setOnConfirm(null)
             } catch (error) {
-                setModalMessage(error instanceof Error ? error.message : "An error occurred");
+                setModalMessage(error instanceof Error ? error.message : "An error occurred")
             }
-        });
-    };
+        })
+    }
 
     const handleFollowAllClick = () => {
         if (!apiKey) {
-            setModalMessage(translations[language].errorMissingCredentials);
-            return;
+            setModalMessage(translations[language].errorMissingCredentials)
+            return
         }
 
-        setConfirmationMessage(translations[language].confirmFollowAll);
+        setConfirmationMessage(translations[language].confirmFollowAll)
         setOnConfirm(() => async () => {
             try {
-                await handleFollowAll(apiKey, language);
-                setConfirmationMessage(null);
-                setOnConfirm(null); // Limpa o estado após a execução
+                await handleFollowAll(apiKey, language)
+                setConfirmationMessage(null)
+                setOnConfirm(null)
             } catch (error) {
-                setModalMessage(error instanceof Error ? error.message : "An error occurred");
+                setModalMessage(error instanceof Error ? error.message : "An error occurred")
             }
-        });
-    };
+        })
+    }
 
     return (
         <div className={styles.page}>
@@ -152,9 +186,9 @@ export default function HomePage() {
                 {/* Modal de mensagem */}
                 {modalMessage && (
                     <Modal
-                        message={parse(modalMessage)} // Renderiza o HTML formatado
+                        message={parse(modalMessage)}
                         onClose={() => setModalMessage(null)}
-                        language={language} // Passa o idioma selecionado
+                        language={language}
                     />
                 )}
                 {/* Modal de confirmação */}
@@ -163,37 +197,62 @@ export default function HomePage() {
                         message={confirmationMessage}
                         onConfirm={async () => {
                             if (onConfirm) {
-                                await onConfirm(); // Chama a função de confirmação
+                                await onConfirm()
                             }
                         }}
                         onCancel={() => {
-                            setConfirmationMessage(null);
-                            setOnConfirm(null);
+                            setConfirmationMessage(null)
+                            setOnConfirm(null)
                         }}
-                        language={language} // Passa o idioma selecionado
+                        language={language}
                     />
                 )}
-                <form className={styles.ctas} onSubmit={(e)=>{ e.preventDefault(); void handleSearch(); }}>
-                    <div style={{display:'flex',gap:8,alignItems:'center'}}>
-                        <label className="sr-only">Tema primário</label>
-                        <select value={primaryVariant} onChange={(e)=> setPrimaryVariant(e.target.value as 'success'|'violet')} className={`${styles.input} ${styles.halfSelect}`}>
-                            <option value="success">Verde (padrão)</option>
-                            <option value="violet">Roxo</option>
+
+                <div className={styles.ctas}>
+                    <div className={styles.topControls}>
+                        {/* Theme Toggle */}
+                        <button
+                            onClick={toggleTheme}
+                            className={`${styles.button} ${styles.iconButton}`}
+                            aria-label={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+                            title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+                        >
+                            {theme === 'light' ? (
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 
+7 7 0 0 0 21 12.79z" /></svg>) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5" /><path
+                                    d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" /></svg>)}
+                        </button>
+
+                        {/* Primary Variant Select */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <label className="sr-only">Tema primário</label>
+                            <select
+                                value={primaryVariant}
+                                onChange={(e) => setPrimaryVariant(e.target.value as 'success' | 'violet')}
+                                className={`${styles.input} ${styles.halfSelect}`}
+                                style={{ width: 'auto' }}
+                            >
+                                <option value="success">Verde</option>
+                                <option value="violet">Roxo</option>
+                            </select>
+                        </div>
+
+                        {/* Language Select */}
+                        <select
+                            id="language-select"
+                            value={language}
+                            onChange={(e) => setLanguage(e.target.value as SupportedLanguages)}
+                            className={styles.input}
+                        >
+                            <option value="pt">Português</option>
+                            <option value="en">English</option>
+                            <option value="zh">中文</option>
+                            <option value="hi">हिन्दी</option>
+                            <option value="ar">العربية</option>
+                            <option value="ja">日本語</option>
                         </select>
                     </div>
-                    <select
-                        id="language-select"
-                        value={language}
-                        onChange={(e) => setLanguage(e.target.value as SupportedLanguages)}
-                        className={`${styles.input} ${styles.halfSelect}`}
-                    >
-                        <option value="pt">Português</option>
-                        <option value="en">English</option>
-                        <option value="zh">中文</option>
-                        <option value="hi">हिन्दी</option>
-                        <option value="ar">العربية</option>
-                        <option value="ja">日本語</option>
-                    </select>
 
                     <div className={styles.inputContainer}>
                         <div className={styles.inputGroup}>
@@ -252,14 +311,15 @@ export default function HomePage() {
                         target="_blank"
                         rel="noreferrer"
                         className={styles.linkButton}
+                        style={{ fontSize: '14px', color: '#0969da', textDecoration: 'none' }}
                     >
                         {translations[language].getApiKey}
                     </a>
 
                     <div className={styles.buttonGroup}>
-                        <button type="submit" className={styles.button} disabled={isSearching}>
-                            {isSearching && <span className="spinner" aria-hidden="true" />}
-                            <span>{isSearching ? translations[language].searching : translations[language].search}</span>
+                        <button onClick={handleSearch} className={styles.button} disabled={isSearching}>
+                            {isSearching && <span className="spinner" aria-hidden="true" style={{ marginRight: 8 }} />}
+                            {isSearching ? translations[language].searching : translations[language].search}
                         </button>
                         <button
                             type="button"
@@ -267,12 +327,10 @@ export default function HomePage() {
                             className={styles.button}
                             disabled={isUnfollowingAny || nonFollowers.length === 0}
                         >
-                            {isUnfollowingAny && <span className="spinner" aria-hidden="true" />}
-                            <span>
-                                {isUnfollowingAny
-                                    ? translations[language].unfollowingAll
-                                    : translations[language].unfollowAll}
-                            </span>
+                            {isUnfollowingAny && <span className="spinner" aria-hidden="true" style={{ marginRight: 8 }} />}
+                            {isUnfollowingAny
+                                ? translations[language].unfollowingAll
+                                : translations[language].unfollowAll}
                         </button>
                         <button
                             type="button"
@@ -280,18 +338,13 @@ export default function HomePage() {
                             className={styles.button}
                             disabled={isFollowingAny || nonFollowing.length === 0}
                         >
-                            {isFollowingAny && <span className="spinner" aria-hidden="true" />}
-                            <span>
-                                {isFollowingAny
-                                    ? translations[language].followingAll
-                                    : translations[language].followAll}
-                            </span>
+                            {isFollowingAny && <span className="spinner" aria-hidden="true" style={{ marginRight: 8 }} />}
+                            {isFollowingAny
+                                ? translations[language].followingAll
+                                : translations[language].followAll}
                         </button>
                     </div>
-                    <div aria-live="polite" className="sr-only">
-                        {isSearching ? translations[language].searching : ''}
-                    </div>
-                </form>
+                </div>
 
                 <div className={styles.listsContainer}>
                     <section className={styles.listSection}>
@@ -306,7 +359,7 @@ export default function HomePage() {
                                     isUnfollowing={isUnfollowingUser(user.login)}
                                     isFollowing={isFollowingUser(user.login)}
                                     hasUnfollowed={unfollowedUsers.includes(user.login)}
-                                    isCurrentlyFollowing={!unfollowedUsers.includes(user.login)} // Alterado aqui
+                                    isCurrentlyFollowing={!unfollowedUsers.includes(user.login)}
                                     language={language}
                                 />
                             ))}
@@ -324,13 +377,13 @@ export default function HomePage() {
                                 <UserCard
                                     key={user.login}
                                     user={user}
-                                    onUnfollow={() => {}} // Unfollow action is not relevant here
+                                    onUnfollow={() => { }}
                                     onFollow={handleFollowClick}
                                     isUnfollowing={false}
                                     isFollowing={isFollowingUser(user.login)}
                                     hasUnfollowed={false}
                                     isCurrentlyFollowing={followingUsers.includes(user.login)}
-                                    language={language} // Passa o idioma selecionado
+                                    language={language}
                                 />
                             ))}
                             {nonFollowing.length === 0 && !isSearching && (
@@ -341,6 +394,45 @@ export default function HomePage() {
                     </section>
                 </div>
             </main>
+
+            <footer className={styles.footer}>
+                <div className={styles.footerContent}>
+                    <div className={styles.statItem}>
+                        <h4>{translations[language].totalVisitors}</h4>
+                        <p className={styles.statValue}>{stats.visitors.toLocaleString()}</p>
+                    </div>
+
+                    {stats.lastUsers.length > 0 && (
+                        <div className={styles.lastUsersSection}>
+                            <h4>{translations[language].lastUsersAnalyzed}</h4>
+                            <div className={styles.lastUsersTags}>
+                                {stats.lastUsers.map((user, index) => (
+                                    <a
+                                        key={index}
+                                        href={`https://github.com/${user}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className={styles.userTag}
+                                        title={`View ${user} on GitHub`}
+                                    >
+                                        <img
+                                            src={`https://github.com/${user}.png?size=20`}
+                                            alt=""
+                                            width="16"
+                                            height="16"
+                                            className={styles.miniAvatar}
+                                        />
+                                        {user}
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+                <div className={styles.copyright}>
+                    Unfollow Non-Followers &copy; {new Date().getFullYear()}
+                </div>
+            </footer>
         </div>
     )
 }
