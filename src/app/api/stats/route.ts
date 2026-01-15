@@ -14,7 +14,7 @@ const getStats=async (): Promise<StatsData> => {
     try {
         const fileContent=await fs.readFile(DB_PATH,'utf-8')
         return JSON.parse(fileContent)
-    } catch(error) {
+    } catch {
         // If file doesn't exist or is invalid, return default
         return {visitors: 0,lastUsers: []}
     }
