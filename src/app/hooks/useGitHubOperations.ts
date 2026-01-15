@@ -51,7 +51,10 @@ export const useGitHubOperations = (githubService: GitHubService) => {
             return success
         } catch (error) {
             console.error(error)
-            throw new Error(translations[language].httpErrorMessage[401].join('\n'));
+            if (error instanceof Error) {
+                throw error
+            }
+            throw new Error(translations[language].catchErrorMessage.genericUnfollowUser)
         } finally {
             setUnfollowingSet(prev => {
                 const next = new Set(prev)
@@ -76,7 +79,10 @@ export const useGitHubOperations = (githubService: GitHubService) => {
             return success
         } catch (error) {
             console.error(error)
-            throw new Error(translations[language].httpErrorMessage[401].join('\n'));
+            if (error instanceof Error) {
+                throw error
+            }
+            throw new Error(translations[language].catchErrorMessage.genericFollowUser)
         } finally {
             setFollowingSet(prev => {
                 const next = new Set(prev)
