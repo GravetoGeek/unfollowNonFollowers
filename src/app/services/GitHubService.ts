@@ -19,18 +19,26 @@ export class GitHubServiceImpl implements GitHubService {
     }
 
     async fetchAllPages<T>(url: string, token: string, language: SupportedLanguages): Promise<T[]> {
-        let results: T[] = [] // Rewritten line
+        let results: T[] = []
         let currentPage = 1
         let hasMorePages = true
+        const MAX_PAGES = 50 // Safety limit: 50 pages * 100 items = 5000 items
 
         try {
-            while (hasMorePages) {
+            while (hasMorePages && currentPage <= MAX_PAGES) {
                 const { controller, id } = this.withTimeout()
-                const response = await fetch(`${url}?per_page=100&page=${currentPage}`, { headers: this.withAuth(token), signal: controller.signal })
+                const response = await fetch(`${url}?per_page=100&page=${currentPage}`, {
+                    headers: this.withAuth(token),
+                    signal: controller.signal
+                })
                 clearTimeout(id)
+                
                 if (!response.ok) {
+                    if (response.status === 401) {
+                        throw new Error(translations[language].httpErrorMessage[401].join('\n'))
+                    }
                     if (translations[language].httpErrorMessage[response.status as 401 | 403 | 404 | 500]) {
-                        throw new Error(translations[language].httpErrorMessage[response.status as 401 | 403 | 404 | 500]!.join('\n'))
+                         throw new Error(translations[language].httpErrorMessage[response.status as 401 | 403 | 404 | 500]!.join('\n'))
                     }
                     throw new Error(translations[language].catchErrorMessage.fetchOnePage({ currentPage, status: response.status, statusText: response.statusText }))
                 }
@@ -43,6 +51,10 @@ export class GitHubServiceImpl implements GitHubService {
                 }
 
                 currentPage++
+            }
+
+            if (currentPage > MAX_PAGES) {
+                console.warn(`Reached maximum page limit of ${MAX_PAGES}. Results may be incomplete.`)
             }
         } catch (error) {
             console.error('Erro ao buscar páginas:', error)
@@ -126,7 +138,14 @@ export class GitHubServiceImpl implements GitHubService {
 
 
             if (!response.ok) {
-                if (translations[language].httpErrorMessage[response.status as 401 | 403 | 404 | 500]) {
+                if (response.status === 401) {
+                    throw new Error(translations[language].httpErrorMessage[401].join('\n'))
+                }
+
+                if (response.status === 403) {
+                    throw new Error(translations[language].httpErrorMessage[403]?.join('\n') || 'Acesso proibido.')
+                }
+                 if (translations[language].httpErrorMessage[response.status as 401 | 403 | 404 | 500]) {
                     throw new Error(translations[language].httpErrorMessage[response.status as 401 | 403 | 404 | 500]!.join('\n'))
                 }
                 throw new Error(translations[language].catchErrorMessage.unfollowUser({ username: usernameToUnfollow, message: `${response.status} ${response.statusText}` }))
@@ -134,7 +153,11 @@ export class GitHubServiceImpl implements GitHubService {
 
             return true
         } catch (error) {
-            // console.error(`Erro ao deixar de seguir ${usernameToUnfollow}:`,error)
+            // Rethrow if it's already a handled error with a message
+            if (error instanceof Error && (error.message.includes("Github") || error.message.includes("Acesso"))) {
+                throw error
+            }
+
             if (error instanceof Error) {
                 throw new Error(translations[language].catchErrorMessage.unfollowUser({ username: usernameToUnfollow, message: error.message }))
             } else {
@@ -150,14 +173,47 @@ export class GitHubServiceImpl implements GitHubService {
             clearTimeout(id)
 
             if (!response.ok) {
+                // Tenta ler o erro detalhado da API do GitHub (ex: rate limit ou escopo)
+                let errorDetails = ""
+                try {
+                    const data = await response.json()
+                    errorDetails = data.message || ""
+                } catch { /* ignore parsing error */ }
+
+                console.error(`Erro ao seguir ${usernameToFollow}: ${response.status} - ${response.statusText} - ${errorDetails}`)
+
+                if (response.status === 401) {
+                    throw new Error(translations[language].httpErrorMessage[401].join('\n'))
+                }
+
+                if (response.status === 403) {
+                    // Se for problema de permissão, usa a mensagem padrão traduzida.
+                    // Se for rate limit, o GitHub geralmente manda "You have triggered an abuse detection mechanism" ou "Secondary rate limit".
+                    if (errorDetails.includes("abuse detection") || errorDetails.includes("rate limit")) {
+                        throw new Error(`Rate Limit (403): ${errorDetails}`)
+                    }
+                    throw new Error(translations[language].httpErrorMessage[403]?.join('\n') || 'Acesso proibido.')
+                }
+
+                if (response.status === 404) {
+                    throw new Error(translations[language].httpErrorMessage[404]?.join('\n') || 'Usuário não encontrado.')
+                }
+                
                 if (translations[language].httpErrorMessage[response.status as 401 | 403 | 404 | 500]) {
                     throw new Error(translations[language].httpErrorMessage[response.status as 401 | 403 | 404 | 500]!.join('\n'))
                 }
-                throw new Error(translations[language].catchErrorMessage.followUser({ username: usernameToFollow, message: `${response.status} ${response.statusText}` }))
+
+                return false
             }
 
             return true
         } catch (error) {
+            console.error('Erro na requisição de follow:', error)
+            // Rethrow if it's already a handled error with a message
+            if (error instanceof Error && (error.message.includes("Github") || error.message.includes("Acesso"))) {
+                throw error
+            }
+
             if (error instanceof Error) {
                 throw new Error(translations[language].catchErrorMessage.followUser({ username: usernameToFollow, message: error.message }))
             } else {
