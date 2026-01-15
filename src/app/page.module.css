@@ -38,10 +38,19 @@
 
 .topControls {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     gap: 0.75rem;
     align-items: center;
     flex-wrap: wrap;
+    width: 100%;
+}
+
+.themeSelectorGroup {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 .inputContainer {
