@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# unfollowNonFollowers
 
-## Getting Started
+Aplicação Next.js para comparar seguidores/seguidos do GitHub, com ações de seguir/deixar de seguir em lote e estatísticas locais.
 
-First, run the development server:
+## Arquitetura atual
+
+- Trilha ativa: `src/app/*`
+- Pastas em transição com placeholders: `src/components/*`, `src/lib/*`, `src/services/*`, `src/types/*`
+- Não mover código da trilha ativa para a trilha em transição sem decisão explícita.
+
+## Requisitos
+
+- Node.js 20+
+- npm 10+
+
+## Configuração
+
+```bash
+npm install
+```
+
+## Executar
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Aplicação disponível em `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Qualidade e testes
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint
+npm run test:unit
+npm run test:e2e
+npm run test:e2e:playwright
+npm run build
+```
 
-## Learn More
+## Segurança do token
 
-To learn more about Next.js, take a look at the following resources:
+- O token GitHub **não é persistido automaticamente**.
+- Para salvar no dispositivo atual, marque a opção de lembrar token na UI.
+- Nunca exponha token em logs, screenshots ou mensagens de erro.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Funcionalidades principais
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Buscar usuários que você segue e não te seguem de volta.
+- Buscar usuários que te seguem e você não segue.
+- Seguir/deixar de seguir individualmente ou em lote.
+- Exibir estatísticas de uso via rota `/api/stats`.
 
-## Deploy on Vercel
+## Runbook (erros comuns)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 1) Erro de `@vercel/kv` ausente
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm install
+```
+
+Se persistir, remova lockfiles conflitantes e reinstale dependências.
+
+### 2) Warning de lockfile raiz/Turbopack
+
+Causa comum: lockfile em diretório pai sendo detectado como root de workspace.
+
+Ações:
+- manter apenas o lockfile do projeto quando possível;
+- ou definir raiz adequada do workspace para execução local/CI.
+
+### 3) Problemas de objetos Git corrompidos
+
+Exemplo de recuperação (com cuidado):
+
+```bash
+git fsck --full
+git fetch --all --prune
+```
+
+Se houver objetos vazios/corrompidos, remover somente os objetos inválidos e refazer `fetch`.
+
+### 4) Playwright falhando por dependências de sistema
+
+```bash
+npx playwright install
+npx playwright install-deps
+```
+
+## Observações
+
+- Internacionalização centralizada em `src/app/constants/translations.ts`.
+- Contrato de `stats` centralizado em `src/app/utils/statsContract.ts`.
