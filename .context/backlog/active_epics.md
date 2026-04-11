@@ -143,7 +143,7 @@ Backlog consolidado a partir da análise profunda de arquitetura, qualidade, seg
 - **Risco/Trade-off:** perda de “esqueleto” para migração futura, se não planejado.
 
 #### Item P2.1.3 — Definir plano de migração único (ou consolida em `src/app`, ou completa nova camada)
-- **Status:** ⏳ Pendente
+- **Status:** ✅ Concluído
 - **Complexidade:** Alta
 - **Dependência:** P2.1.2
 - **Benefício:** elimina dívida estrutural de longo prazo.
@@ -183,7 +183,7 @@ Backlog consolidado a partir da análise profunda de arquitetura, qualidade, seg
 - **Risco/Trade-off:** refactor em traduções e modal.
 
 #### Item P2.3.2 — Encapsular links como metadado (não como HTML embutido)
-- **Status:** ⏳ Pendente
+- **Status:** ✅ Concluído
 - **Complexidade:** Média
 - **Dependência:** P2.3.1
 - **Benefício:** renderização segura e controle total de acessibilidade.
@@ -212,7 +212,7 @@ Backlog consolidado a partir da análise profunda de arquitetura, qualidade, seg
 - **Risco/Trade-off:** mock de KV/FS pode exigir utilitários extras.
 
 #### Item P3.1.3 — Smoke test de fluxo principal (buscar + follow/unfollow)
-- **Status:** 🟡 Parcial (smoke de carregamento existe; falta fluxo principal completo)
+- **Status:** ✅ Concluído
 - **Complexidade:** Alta
 - **Dependência:** P3.1.1, P3.1.2
 - **Benefício:** confiança de release e validação do fluxo de ponta a ponta.
@@ -266,28 +266,28 @@ Backlog consolidado a partir da análise profunda de arquitetura, qualidade, seg
 - **Risco/Trade-off:** testes mais sensíveis a mudanças internas (maior custo de manutenção).
 
 #### Item P3.3.4 — Criar suíte E2E funcional (fluxo principal) com mocks determinísticos
-- **Status:** ⏳ Pendente
+- **Status:** ✅ Concluído
 - **Complexidade:** Alta
 - **Dependência:** P3.3.1
 - **Benefício:** valida jornada real do usuário ponta a ponta.
 - **Risco/Trade-off:** tempo de execução maior; precisa isolamento de ambiente.
 
 #### Item P3.3.5 — Criar suíte E2E Playwright para UI crítica e estados de erro
-- **Status:** 🟡 Parcial (smoke básico implementado; faltam estados de erro críticos)
+- **Status:** ✅ Concluído
 - **Complexidade:** Alta
 - **Dependência:** P3.3.4
 - **Benefício:** valida renderização, acessibilidade e interações reais no browser.
 - **Risco/Trade-off:** flakes se não houver controle de rede/tempo.
 
 #### Item P3.3.6 — Ativar gate obrigatório de cobertura 100% em CI
-- **Status:** 🟡 Parcial (gate local ativo no Vitest; falta integração CI)
+- **Status:** ✅ Concluído
 - **Complexidade:** Média
 - **Dependência:** P3.3.3, P3.3.4, P3.3.5
 - **Benefício:** impede regressão de qualidade antes do merge.
 - **Risco/Trade-off:** pipeline mais rígido pode bloquear entregas rápidas quando a suíte estiver instável.
 
 #### Item P3.3.7 — Estratégia anti-flake e observabilidade de testes
-- **Status:** ⏳ Pendente
+- **Status:** ✅ Concluído
 - **Complexidade:** Média
 - **Dependência:** P3.3.4, P3.3.5
 - **Benefício:** estabilidade contínua do gate 100%.
