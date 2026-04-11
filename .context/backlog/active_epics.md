@@ -114,7 +114,7 @@ Backlog consolidado a partir da análise profunda de arquitetura, qualidade, seg
 - **Risco/Trade-off:** aumento inicial de arquivos/componentes.
 
 #### Item P1.2.3 — Extrair `footer stats` para componente dedicado com fallback defensivo
-- **Status:** ⏳ Pendente
+- **Status:** ✅ Concluído
 - **Complexidade:** Baixa
 - **Dependência:** P0.1
 - **Benefício:** isola a área mais sujeita a crash de shape.

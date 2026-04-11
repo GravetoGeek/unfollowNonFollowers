@@ -1,10 +1,10 @@
 "use client"
 
-import Image from 'next/image'
 import { useEffect, useMemo, useState } from 'react'
 import ConfirmationModal from './components/Modal/ConfirmationModal'
 import Modal from './components/Modal/Modal'
 import CredentialsAndActions from './components/CredentialsAndActions/CredentialsAndActions'
+import StatsFooter from './components/StatsFooter/StatsFooter'
 import TopControls from './components/TopControls/TopControls'
 import { UserCard } from './components/UserCard/UserCard'
 import { SupportedLanguages, translations } from './constants/translations'
@@ -327,44 +327,7 @@ export default function HomePage() {
                 </div>
             </main>
 
-            <footer className={styles.footer}>
-                <div className={styles.footerContent}>
-                    <div className={styles.statItem}>
-                        <h4>{translations[language].totalVisitors}</h4>
-                        <p className={styles.statValue}>{stats.visitors.toLocaleString()}</p>
-                    </div>
-
-                    {stats.lastUsers.length > 0 && (
-                        <div className={styles.lastUsersSection}>
-                            <h4>{translations[language].lastUsersAnalyzed}</h4>
-                            <div className={styles.lastUsersTags}>
-                                {stats.lastUsers.map((user, index) => (
-                                    <a
-                                        key={index}
-                                        href={`https://github.com/${user}`}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className={styles.userTag}
-                                        title={`View ${user} on GitHub`}
-                                    >
-                                        <Image
-                                            src={`https://avatars.githubusercontent.com/${user}?size=20`}
-                                            alt={`${user} avatar`}
-                                            width={16}
-                                            height={16}
-                                            className={styles.miniAvatar}
-                                        />
-                                        {user}
-                                    </a>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-                <div className={styles.copyright}>
-                    Unfollow Non-Followers &copy; {new Date().getFullYear()}
-                </div>
-            </footer>
+            <StatsFooter language={language} stats={stats} />
         </div>
     )
 }
