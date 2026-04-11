@@ -148,6 +148,21 @@ describe('useGitHubOperations', () => {
         )
     })
 
+    it('propaga erro existente ao receber Error em unfollow', async () => {
+        const service = createServiceMock()
+        vi.mocked(service.fetchNonFollowers).mockResolvedValue([user('alice')])
+        vi.mocked(service.fetchNonFollowing).mockResolvedValue([])
+        vi.mocked(service.unfollowUser).mockRejectedValue(new Error('api exploded'))
+
+        const { result } = renderHook(() => useGitHubOperations(service))
+
+        await act(async () => {
+            await result.current.handleSearchNonFollowers('octocat', 'token-123', 'en')
+        })
+
+        await expect(result.current.handleUnfollow('alice', 'token-123', 'en')).rejects.toThrow('api exploded')
+    })
+
     it('retorna erro genérico ao receber exceção não-Error em follow', async () => {
         const service = createServiceMock()
         vi.mocked(service.fetchNonFollowers).mockResolvedValue([])
@@ -163,5 +178,20 @@ describe('useGitHubOperations', () => {
         await expect(result.current.handleFollow('bob', 'token-123', 'en')).rejects.toThrow(
             'Failed to follow the user.',
         )
+    })
+
+    it('propaga erro existente ao receber Error em follow', async () => {
+        const service = createServiceMock()
+        vi.mocked(service.fetchNonFollowers).mockResolvedValue([])
+        vi.mocked(service.fetchNonFollowing).mockResolvedValue([user('bob')])
+        vi.mocked(service.followUser).mockRejectedValue(new Error('api exploded'))
+
+        const { result } = renderHook(() => useGitHubOperations(service))
+
+        await act(async () => {
+            await result.current.handleSearchNonFollowers('octocat', 'token-123', 'en')
+        })
+
+        await expect(result.current.handleFollow('bob', 'token-123', 'en')).rejects.toThrow('api exploded')
     })
 })
