@@ -4,9 +4,14 @@
     "private": true,
     "scripts": {
         "dev": "next dev --turbopack",
+        "dev:test": "next dev --turbopack --port 4173",
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
+        "test": "npm run test:unit && npm run test:e2e && npm run test:e2e:playwright",
+        "test:unit": "vitest run tests/unit --coverage",
+        "test:e2e": "vitest run tests/e2e",
+        "test:e2e:playwright": "playwright test",
         "clearBranchsLinux": "git fetch -p && for branch in `git branch -vv | grep ': gone]' | awk '{print $1}'`; do git branch -D $branch; done"
     },
     "dependencies": {
@@ -18,11 +23,17 @@
     },
     "devDependencies": {
         "@eslint/eslintrc": "^3",
+        "@playwright/test": "^1.59.1",
+        "@testing-library/jest-dom": "^6.9.1",
+        "@testing-library/react": "^16.3.2",
         "@types/node": "^20",
         "@types/react": "^19",
         "@types/react-dom": "^19",
+        "@vitest/coverage-v8": "^4.1.4",
         "eslint": "^9",
         "eslint-config-next": "15.2.2",
-        "typescript": "^5"
+        "jsdom": "^29.0.2",
+        "typescript": "^5",
+        "vitest": "^4.1.4"
     }
 }
