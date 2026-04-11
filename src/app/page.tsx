@@ -12,8 +12,28 @@ import { GitHubServiceImpl } from './services/GitHubService'
 import { DEFAULT_STATS, StatsData, toStatsResponse } from './utils/statsContract'
 
 export default function HomePage() {
-    const [username, setUsername] = useState("");
-    const [apiKey, setApiKey] = useState("");
+    const [username, setUsername] = useState(() => {
+        try {
+            return localStorage.getItem('githubUsername') || ''
+        } catch {
+            return ''
+        }
+    })
+    const [apiKey, setApiKey] = useState(() => {
+        try {
+            const shouldRemember = localStorage.getItem('rememberGithubApiKey') === 'true'
+            return shouldRemember ? localStorage.getItem('githubApiKey') || '' : ''
+        } catch {
+            return ''
+        }
+    })
+    const [rememberApiKey, setRememberApiKey] = useState(() => {
+        try {
+            return localStorage.getItem('rememberGithubApiKey') === 'true'
+        } catch {
+            return false
+        }
+    })
     const [showApiKey, setShowApiKey] = useState(false);
     const [language, setLanguage] = useState<SupportedLanguages>("pt");
     const [primaryVariant, setPrimaryVariant] = useState<'success' | 'violet'>(() => {
@@ -22,7 +42,18 @@ export default function HomePage() {
     const [modalMessage, setModalMessage] = useState<string | null>(null);
     const [confirmationMessage, setConfirmationMessage] = useState<string | null>(null);
     const [onConfirm, setOnConfirm] = useState<(() => Promise<void>) | null>(null);
-    const [theme, setTheme] = useState<"light" | "dark">("light")
+    const [theme, setTheme] = useState<"light" | "dark">(() => {
+        try {
+            const storedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null
+            if (storedTheme) {
+                return storedTheme
+            }
+
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        } catch {
+            return 'light'
+        }
+    })
     const [stats, setStats] = useState<StatsData>(DEFAULT_STATS)
 
     const gitHubService = useMemo(() => new GitHubServiceImpl(), [])
@@ -44,22 +75,9 @@ export default function HomePage() {
         handleFollowAll
     } = githubOperations
 
-    // Carregar tema
-    useEffect(() => {
-        const storedTheme = localStorage.getItem("theme") as "light" | "dark" | null
-        if (storedTheme) {
-            setTheme(storedTheme)
-            document.documentElement.setAttribute("data-theme", storedTheme)
-        } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-            setTheme("dark")
-        }
-    }, [])
-
     const toggleTheme = () => {
         const newTheme = theme === "light" ? "dark" : "light"
         setTheme(newTheme)
-        localStorage.setItem("theme", newTheme)
-        document.documentElement.setAttribute("data-theme", newTheme)
     }
 
     const refreshStats=async (requestInit?: RequestInit) => {
@@ -73,19 +91,19 @@ export default function HomePage() {
         }
     }
 
-    // Carregar o nome do usuário e a chave da API do localStorage ao inicializar
     useEffect(() => {
-        const storedUsername = localStorage.getItem("githubUsername")
-        const storedApiKey = localStorage.getItem("githubApiKey")
-        if (storedUsername) {
-            setUsername(storedUsername)
-        }
-        if (storedApiKey) {
-            setApiKey(storedApiKey)
-        }
+        document.documentElement.setAttribute("data-theme", theme)
+        localStorage.setItem("theme", theme)
+    }, [theme])
 
-        // Fetch stats
-        void refreshStats()
+    useEffect(() => {
+        const timeoutId = window.setTimeout(() => {
+            void refreshStats()
+        }, 0)
+
+        return () => {
+            window.clearTimeout(timeoutId)
+        }
     }, [])
 
     // Atualizar o localStorage sempre que o nome do usuário ou a chave da API mudar
@@ -96,10 +114,21 @@ export default function HomePage() {
     }, [username])
 
     useEffect(() => {
+        if (!rememberApiKey) {
+            localStorage.removeItem("githubApiKey")
+            return
+        }
+
         if (apiKey) {
             localStorage.setItem("githubApiKey", apiKey)
+        } else {
+            localStorage.removeItem("githubApiKey")
         }
-    }, [apiKey])
+    }, [apiKey, rememberApiKey])
+
+    useEffect(() => {
+        localStorage.setItem('rememberGithubApiKey', String(rememberApiKey))
+    }, [rememberApiKey])
 
     useEffect(() => {
         try { localStorage.setItem('primaryVariant', primaryVariant) } catch { }
@@ -316,6 +345,16 @@ export default function HomePage() {
                                 ✕
                             </button>
                         </div>
+
+                        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
+                            <input
+                                id="remember-api-key-checkbox"
+                                type="checkbox"
+                                checked={rememberApiKey}
+                                onChange={(e) => setRememberApiKey(e.target.checked)}
+                            />
+                            {translations[language].rememberToken}
+                        </label>
                     </div>
 
                     <a

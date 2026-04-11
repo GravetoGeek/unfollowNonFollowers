@@ -1,8 +1,9 @@
-export type SupportedLanguages="pt"|"en"|"zh"|"hi"|"ar"|"ja"
+export type SupportedLanguages = "pt" | "en" | "zh" | "hi" | "ar" | "ja"
 
 interface Translation {
     githubUsername: string
     githubApiKey: string
+    rememberToken: string
     getApiKey: string
     search: string
     searching: string
@@ -34,16 +35,16 @@ interface Translation {
         500?: string[],
     },
     catchErrorMessage: {
-        fetchOnePage: ({currentPage,status,statusText}: {currentPage: number,status: number,statusText: string}) => string,
-        fetchManyPages: ({message}: {message: string}) => string,
+        fetchOnePage: ({ currentPage, status, statusText }: { currentPage: number, status: number, statusText: string }) => string,
+        fetchManyPages: ({ message }: { message: string }) => string,
         genericFetchManyPages: string,
-        fetchNonFollowers: ({message}: {message: string}) => string,
+        fetchNonFollowers: ({ message }: { message: string }) => string,
         genericFetchNonFollowers: string,
-        fetchNonFollowing: ({message}: {message: string}) => string,
+        fetchNonFollowing: ({ message }: { message: string }) => string,
         genericFetchNonFollowing: string,
-        unfollowUser: ({username,message}: {username: string,message: string}) => string,
+        unfollowUser: ({ username, message }: { username: string, message: string }) => string,
         genericUnfollowUser: string,
-        followUser: ({username,message}: {username: string,message: string}) => string,
+        followUser: ({ username, message }: { username: string, message: string }) => string,
         genericFollowUser: string,
     }
 
@@ -57,10 +58,11 @@ interface Translation {
 // 4. Carefully review and grant the necessary fine grained permissions to your token
 // Use the generated token here
 
-export const translations: Record<SupportedLanguages,Translation>={
+export const translations: Record<SupportedLanguages, Translation> = {
     pt: {
         githubUsername: "Nome de usuário do GitHub",
         githubApiKey: "Chave da API do GitHub",
+        rememberToken: "Lembrar token neste dispositivo",
         getApiKey: "Obtenha sua chave da API",
         search: "Buscar",
         searching: "Buscando...",
@@ -86,17 +88,17 @@ export const translations: Record<SupportedLanguages,Translation>={
         cancel: "Cancelar",
         close: "Fechar",
         catchErrorMessage: {
-            fetchOnePage: ({currentPage,status,statusText}) =>
+            fetchOnePage: ({ currentPage, status, statusText }) =>
                 `Erro ao buscar dados na página ${currentPage}: ${status} - ${statusText}`,
-            fetchManyPages: ({message}) => `Falha ao obter dados de múltiplas páginas: ${message}`,
+            fetchManyPages: ({ message }) => `Falha ao obter dados de múltiplas páginas: ${message}`,
             genericFetchManyPages: `Falha ao obter dados de múltiplas páginas.`,
-            fetchNonFollowers: ({message}) => `Falha ao buscar não seguidores: ${message}`,
+            fetchNonFollowers: ({ message }) => `Falha ao buscar não seguidores: ${message}`,
             genericFetchNonFollowers: `Falha ao buscar não seguidores.`,
-            fetchNonFollowing: ({message}) => `Falha ao buscar não seguidos: ${message}`,
+            fetchNonFollowing: ({ message }) => `Falha ao buscar não seguidos: ${message}`,
             genericFetchNonFollowing: `Falha ao buscar não seguidos.`,
-            unfollowUser: ({username,message}) => `Falha ao deixar de seguir ${username}: ${message}`,
+            unfollowUser: ({ username, message }) => `Falha ao deixar de seguir ${username}: ${message}`,
             genericUnfollowUser: `Falha ao deixar de seguir o usuário.`,
-            followUser: ({username,message}) => `Falha ao seguir ${username}: ${message}`,
+            followUser: ({ username, message }) => `Falha ao seguir ${username}: ${message}`,
             genericFollowUser: `Falha ao seguir o usuário.`,
         },
         httpErrorMessage: {
@@ -121,6 +123,7 @@ export const translations: Record<SupportedLanguages,Translation>={
     en: {
         githubUsername: "GitHub Username",
         githubApiKey: "GitHub API Key",
+        rememberToken: "Remember token on this device",
         getApiKey: "Get your API key",
         search: "Search",
         searching: "Searching...",
@@ -146,17 +149,17 @@ export const translations: Record<SupportedLanguages,Translation>={
         totalVisitors: "Total visitors",
         lastUsersAnalyzed: "Last analyzed users",
         catchErrorMessage: {
-            fetchOnePage: ({currentPage,status,statusText}) =>
+            fetchOnePage: ({ currentPage, status, statusText }) =>
                 `Error fetching data on page ${currentPage}: ${status} - ${statusText}`,
-            fetchManyPages: ({message}) => `Failed to fetch data from multiple pages: ${message}`,
+            fetchManyPages: ({ message }) => `Failed to fetch data from multiple pages: ${message}`,
             genericFetchManyPages: `Failed to fetch data from multiple pages.`,
-            fetchNonFollowers: ({message}) => `Failed to fetch non-followers: ${message}`,
+            fetchNonFollowers: ({ message }) => `Failed to fetch non-followers: ${message}`,
             genericFetchNonFollowers: `Failed to fetch non-followers.`,
-            fetchNonFollowing: ({message}) => `Failed to fetch non-following: ${message}`,
+            fetchNonFollowing: ({ message }) => `Failed to fetch non-following: ${message}`,
             genericFetchNonFollowing: `Failed to fetch non-following.`,
-            unfollowUser: ({username,message}) => `Failed to unfollow ${username}: ${message}`,
+            unfollowUser: ({ username, message }) => `Failed to unfollow ${username}: ${message}`,
             genericUnfollowUser: `Failed to unfollow the user.`,
-            followUser: ({username,message}) => `Failed to follow ${username}: ${message}`,
+            followUser: ({ username, message }) => `Failed to follow ${username}: ${message}`,
             genericFollowUser: `Failed to follow the user.`,
         },
         httpErrorMessage: {
@@ -181,6 +184,7 @@ export const translations: Record<SupportedLanguages,Translation>={
     zh: {
         githubUsername: "GitHub 用户名",
         githubApiKey: "GitHub API 密钥",
+        rememberToken: "在此设备上记住令牌",
         getApiKey: "获取您的 API 密钥",
         search: "搜索",
         searching: "搜索中...",
@@ -206,17 +210,17 @@ export const translations: Record<SupportedLanguages,Translation>={
         cancel: "取消",
         close: "关闭",
         catchErrorMessage: {
-            fetchOnePage: ({currentPage,status,statusText}) =>
+            fetchOnePage: ({ currentPage, status, statusText }) =>
                 `获取第 ${currentPage} 页数据时出错：${status} - ${statusText}`,
-            fetchManyPages: ({message}) => `从多个页面获取数据失败：${message}`,
+            fetchManyPages: ({ message }) => `从多个页面获取数据失败：${message}`,
             genericFetchManyPages: `从多个页面获取数据失败。`,
-            fetchNonFollowers: ({message}) => `获取非关注者失败：${message}`,
+            fetchNonFollowers: ({ message }) => `获取非关注者失败：${message}`,
             genericFetchNonFollowers: `获取非关注者失败。`,
-            fetchNonFollowing: ({message}) => `获取未关注用户失败：${message}`,
+            fetchNonFollowing: ({ message }) => `获取未关注用户失败：${message}`,
             genericFetchNonFollowing: `获取未关注用户失败。`,
-            unfollowUser: ({username,message}) => `取消关注 ${username} 失败：${message}`,
+            unfollowUser: ({ username, message }) => `取消关注 ${username} 失败：${message}`,
             genericUnfollowUser: `取消关注用户失败。`,
-            followUser: ({username,message}) => `关注 ${username} 失败：${message}`,
+            followUser: ({ username, message }) => `关注 ${username} 失败：${message}`,
             genericFollowUser: `关注用户失败。`,
         },
         httpErrorMessage: {
@@ -236,6 +240,7 @@ export const translations: Record<SupportedLanguages,Translation>={
     hi: {
         githubUsername: "GitHub उपयोगकर्ता नाम",
         githubApiKey: "GitHub API कुंजी",
+        rememberToken: "इस डिवाइस पर टोकन याद रखें",
         getApiKey: "अपनी API कुंजी प्राप्त करें",
         search: "खोजें",
         searching: "खोज जारी है...",
@@ -261,17 +266,17 @@ export const translations: Record<SupportedLanguages,Translation>={
         cancel: "रद्द करें",
         close: "बंद करें",
         catchErrorMessage: {
-            fetchOnePage: ({currentPage,status,statusText}) =>
+            fetchOnePage: ({ currentPage, status, statusText }) =>
                 `पृष्ठ ${currentPage} पर डेटा लाने में त्रुटि: ${status} - ${statusText}`,
-            fetchManyPages: ({message}) => `कई पृष्ठों से डेटा लाने में विफल: ${message}`,
+            fetchManyPages: ({ message }) => `कई पृष्ठों से डेटा लाने में विफल: ${message}`,
             genericFetchManyPages: `कई पृष्ठों से डेटा लाने में विफल।`,
-            fetchNonFollowers: ({message}) => `गैर-फॉलोअर्स लाने में विफल: ${message}`,
+            fetchNonFollowers: ({ message }) => `गैर-फॉलोअर्स लाने में विफल: ${message}`,
             genericFetchNonFollowers: `गैर-फॉलोअर्स लाने में विफल।`,
-            fetchNonFollowing: ({message}) => `गैर-फॉलोइंग लाने में विफल: ${message}`,
+            fetchNonFollowing: ({ message }) => `गैर-फॉलोइंग लाने में विफल: ${message}`,
             genericFetchNonFollowing: `गैर-फॉलोइंग लाने में विफल।`,
-            unfollowUser: ({username,message}) => `अनफॉलो करने में विफल ${username}: ${message}`,
+            unfollowUser: ({ username, message }) => `अनफॉलो करने में विफल ${username}: ${message}`,
             genericUnfollowUser: `उपयोगकर्ता को अनफॉलो करने में विफल।`,
-            followUser: ({username,message}) => `फॉलो करने में विफल ${username}: ${message}`,
+            followUser: ({ username, message }) => `फॉलो करने में विफल ${username}: ${message}`,
             genericFollowUser: `उपयोगकर्ता को फॉलो करने में विफल।`,
         },
         httpErrorMessage: {
@@ -291,6 +296,7 @@ export const translations: Record<SupportedLanguages,Translation>={
     ar: {
         githubUsername: "اسم مستخدم GitHub",
         githubApiKey: "مفتاح API الخاص بـ GitHub",
+        rememberToken: "تذكر الرمز على هذا الجهاز",
         getApiKey: "احصل على مفتاح API الخاص بك",
         search: "بحث",
         searching: "جارٍ البحث...",
@@ -316,17 +322,17 @@ export const translations: Record<SupportedLanguages,Translation>={
         cancel: "إلغاء",
         close: "إغلاق",
         catchErrorMessage: {
-            fetchOnePage: ({currentPage,status,statusText}) =>
+            fetchOnePage: ({ currentPage, status, statusText }) =>
                 `خطأ في جلب البيانات في الصفحة ${currentPage}: ${status} - ${statusText}`,
-            fetchManyPages: ({message}) => `فشل في جلب البيانات من صفحات متعددة: ${message}`,
+            fetchManyPages: ({ message }) => `فشل في جلب البيانات من صفحات متعددة: ${message}`,
             genericFetchManyPages: `فشل في جلب البيانات من صفحات متعددة.`,
-            fetchNonFollowers: ({message}) => `فشل في جلب غير المتابعين: ${message}`,
+            fetchNonFollowers: ({ message }) => `فشل في جلب غير المتابعين: ${message}`,
             genericFetchNonFollowers: `فشل في جلب غير المتابعين.`,
-            fetchNonFollowing: ({message}) => `فشل في جلب غير المتابعين: ${message}`,
+            fetchNonFollowing: ({ message }) => `فشل في جلب غير المتابعين: ${message}`,
             genericFetchNonFollowing: `فشل في جلب غير المتابعين.`,
-            unfollowUser: ({username,message}) => `فشل في إلغاء متابعة ${username}: ${message}`,
+            unfollowUser: ({ username, message }) => `فشل في إلغاء متابعة ${username}: ${message}`,
             genericUnfollowUser: `فشل في إلغاء متابعة المستخدم.`,
-            followUser: ({username,message}) => `فشل في متابعة ${username}: ${message}`,
+            followUser: ({ username, message }) => `فشل في متابعة ${username}: ${message}`,
             genericFollowUser: `فشل في متابعة المستخدم.`,
         },
         httpErrorMessage: {
@@ -346,6 +352,7 @@ export const translations: Record<SupportedLanguages,Translation>={
     ja: {
         githubUsername: "GitHub ユーザー名",
         githubApiKey: "GitHub API キー",
+        rememberToken: "この端末でトークンを記憶する",
         getApiKey: "API キーを取得",
         search: "検索",
         searching: "検索中...",
@@ -371,17 +378,17 @@ export const translations: Record<SupportedLanguages,Translation>={
         totalVisitors: "総訪問者数",
         lastUsersAnalyzed: "最近分析されたユーザー",
         catchErrorMessage: {
-            fetchOnePage: ({currentPage,status,statusText}) =>
+            fetchOnePage: ({ currentPage, status, statusText }) =>
                 `ページ ${currentPage} のデータ取得エラー: ${status} - ${statusText}`,
-            fetchManyPages: ({message}) => `複数ページのデータ取得に失敗しました: ${message}`,
+            fetchManyPages: ({ message }) => `複数ページのデータ取得に失敗しました: ${message}`,
             genericFetchManyPages: `複数ページのデータ取得に失敗しました。`,
-            fetchNonFollowers: ({message}) => `非フォロワーの取得に失敗しました: ${message}`,
+            fetchNonFollowers: ({ message }) => `非フォロワーの取得に失敗しました: ${message}`,
             genericFetchNonFollowers: `非フォロワーの取得に失敗しました。`,
-            fetchNonFollowing: ({message}) => `非フォローの取得に失敗しました: ${message}`,
+            fetchNonFollowing: ({ message }) => `非フォローの取得に失敗しました: ${message}`,
             genericFetchNonFollowing: `非フォローの取得に失敗しました。`,
-            unfollowUser: ({username,message}) => `${username} のフォロー解除に失敗しました: ${message}`,
+            unfollowUser: ({ username, message }) => `${username} のフォロー解除に失敗しました: ${message}`,
             genericUnfollowUser: `ユーザーのフォロー解除に失敗しました。`,
-            followUser: ({username,message}) => `${username} のフォローに失敗しました: ${message}`,
+            followUser: ({ username, message }) => `${username} のフォローに失敗しました: ${message}`,
             genericFollowUser: `ユーザーのフォローに失敗しました。`,
         },
         httpErrorMessage: {
