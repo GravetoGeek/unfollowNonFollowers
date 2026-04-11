@@ -63,6 +63,24 @@ describe('useGitHubOperations', () => {
         expect(result.current.unfollowedUsers).toEqual(['alice'])
     })
 
+    it('não altera listas quando unfollow retorna false', async () => {
+        const service = createServiceMock()
+        vi.mocked(service.fetchNonFollowers).mockResolvedValue([user('alice')])
+        vi.mocked(service.fetchNonFollowing).mockResolvedValue([])
+        vi.mocked(service.unfollowUser).mockResolvedValue(false)
+
+        const { result } = renderHook(() => useGitHubOperations(service))
+
+        await act(async () => {
+            await result.current.handleSearchNonFollowers('octocat', 'token-123', 'en')
+            const response = await result.current.handleUnfollow('alice', 'token-123', 'en')
+            expect(response).toBe(false)
+        })
+
+        expect(result.current.nonFollowers).toEqual([user('alice')])
+        expect(result.current.unfollowedUsers).toEqual([])
+    })
+
     it('atualiza estado ao seguir usuário com sucesso', async () => {
         const service = createServiceMock()
         vi.mocked(service.fetchNonFollowers).mockResolvedValue([])
@@ -78,6 +96,24 @@ describe('useGitHubOperations', () => {
 
         expect(result.current.nonFollowing).toEqual([])
         expect(result.current.followingUsers).toEqual(['bob'])
+    })
+
+    it('não altera listas quando follow retorna false', async () => {
+        const service = createServiceMock()
+        vi.mocked(service.fetchNonFollowers).mockResolvedValue([])
+        vi.mocked(service.fetchNonFollowing).mockResolvedValue([user('bob')])
+        vi.mocked(service.followUser).mockResolvedValue(false)
+
+        const { result } = renderHook(() => useGitHubOperations(service))
+
+        await act(async () => {
+            await result.current.handleSearchNonFollowers('octocat', 'token-123', 'en')
+            const response = await result.current.handleFollow('bob', 'token-123', 'en')
+            expect(response).toBe(false)
+        })
+
+        expect(result.current.nonFollowing).toEqual([user('bob')])
+        expect(result.current.followingUsers).toEqual([])
     })
 
     it('executa unfollow em lote respeitando todos os usuários carregados', async () => {

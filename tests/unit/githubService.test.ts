@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { translations } from '@/app/constants/translations'
 import { GitHubServiceImpl } from '@/app/services/GitHubService'
 
 type MockResponseOptions = {
@@ -279,6 +280,24 @@ describe('GitHubServiceImpl', () => {
             .toThrow('Failed to unfollow octocat: 418 I\'m a teapot')
     })
 
+    it('unfollowUser usa fallback quando tradução 403 está ausente', async () => {
+        const original403 = translations.en.httpErrorMessage[403]
+        try {
+            translations.en.httpErrorMessage[403] = undefined
+
+            vi.stubGlobal(
+                'fetch',
+                vi.fn().mockResolvedValue(createMockResponse({ ok: false, status: 403, statusText: 'Forbidden' })),
+            )
+
+            await expect(service.unfollowUser('octocat', 'token-123', 'en'))
+                .rejects
+                .toThrow('Acesso proibido.')
+        } finally {
+            translations.en.httpErrorMessage[403] = original403
+        }
+    })
+
     it('unfollowUser trata erro genérico quando exceção não é Error', async () => {
         vi.stubGlobal('fetch', vi.fn().mockRejectedValue('network-down'))
 
@@ -343,6 +362,31 @@ describe('GitHubServiceImpl', () => {
             .toThrow('Failed to follow octocat: Access denied (403).')
     })
 
+    it('followUser usa fallback quando tradução 403 está ausente', async () => {
+        const original403 = translations.en.httpErrorMessage[403]
+        try {
+            translations.en.httpErrorMessage[403] = undefined
+
+            vi.stubGlobal(
+                'fetch',
+                vi.fn().mockResolvedValue(
+                    createMockResponse({
+                        ok: false,
+                        status: 403,
+                        statusText: 'Forbidden',
+                        jsonData: { message: 'forbidden by policy' },
+                    }),
+                ),
+            )
+
+            await expect(service.followUser('octocat', 'token-123', 'en'))
+                .rejects
+                .toThrow('Acesso proibido.')
+        } finally {
+            translations.en.httpErrorMessage[403] = original403
+        }
+    })
+
     it('followUser trata erro 404 com mensagem contextual', async () => {
         vi.stubGlobal(
             'fetch',
@@ -352,6 +396,24 @@ describe('GitHubServiceImpl', () => {
         await expect(service.followUser('octocat', 'token-123', 'en'))
             .rejects
             .toThrow('Failed to follow octocat: Resource not found. Check the URL or identifier.')
+    })
+
+    it('followUser usa fallback quando tradução 404 está ausente', async () => {
+        const original404 = translations.en.httpErrorMessage[404]
+        try {
+            translations.en.httpErrorMessage[404] = undefined
+
+            vi.stubGlobal(
+                'fetch',
+                vi.fn().mockResolvedValue(createMockResponse({ ok: false, status: 404, statusText: 'Not Found' })),
+            )
+
+            await expect(service.followUser('octocat', 'token-123', 'en'))
+                .rejects
+                .toThrow('Failed to follow octocat: Usuário não encontrado.')
+        } finally {
+            translations.en.httpErrorMessage[404] = original404
+        }
     })
 
     it('followUser retorna false para status desconhecido', async () => {
