@@ -113,7 +113,7 @@ export default function CredentialsAndActions({
             </div>
 
             <a
-                href="https://github.com/settings/personal-access-tokens"
+                href={translations[language].externalLinks.personalAccessTokens}
                 target="_blank"
                 rel="noreferrer"
                 className={styles.linkButton}

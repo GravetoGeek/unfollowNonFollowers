@@ -14,9 +14,11 @@ describe('translations contract', () => {
         expect(typeof t.githubUsername).toBe('string')
         expect(typeof t.githubApiKey).toBe('string')
         expect(typeof t.rememberToken).toBe('string')
+        expect(typeof t.externalLinks.personalAccessTokens).toBe('string')
         expect(typeof t.search).toBe('string')
         expect(typeof t.noUsersFound).toBe('string')
         expect(typeof t.totalVisitors).toBe('string')
+        expect(t.externalLinks.personalAccessTokens.startsWith('https://')).toBe(true)
 
         expect(Array.isArray(t.httpErrorMessage[401])).toBe(true)
         expect(t.httpErrorMessage[401].length).toBeGreaterThan(0)
