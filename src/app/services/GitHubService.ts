@@ -4,6 +4,9 @@ import { User } from '../interfaces/User'
 
 export class GitHubServiceImpl implements GitHubService {
     private readonly baseUrl = "https://api.github.com";
+    private readonly maxPages = 50
+    private readonly perPage = 100
+    private hasPaginationTruncated = false
     private readonly defaultHeaders = {
         Accept: 'application/vnd.github+json',
         'X-GitHub-Api-Version': '2022-11-28',
@@ -18,16 +21,27 @@ export class GitHubServiceImpl implements GitHubService {
         return { controller, id }
     }
 
+    consumePaginationTruncatedNotice(language: SupportedLanguages): string | null {
+        if (!this.hasPaginationTruncated) {
+            return null
+        }
+
+        this.hasPaginationTruncated = false
+        return translations[language].paginationTruncatedNotice({
+            maxPages: this.maxPages,
+            maxItems: this.maxPages * this.perPage,
+        })
+    }
+
     async fetchAllPages<T>(url: string, token: string, language: SupportedLanguages): Promise<T[]> {
         let results: T[] = []
         let currentPage = 1
         let hasMorePages = true
-        const MAX_PAGES = 50 // Safety limit: 50 pages * 100 items = 5000 items
 
         try {
-            while (hasMorePages && currentPage <= MAX_PAGES) {
+            while (hasMorePages && currentPage <= this.maxPages) {
                 const { controller, id } = this.withTimeout()
-                const response = await fetch(`${url}?per_page=100&page=${currentPage}`, {
+                const response = await fetch(`${url}?per_page=${this.perPage}&page=${currentPage}`, {
                     headers: this.withAuth(token),
                     signal: controller.signal
                 })
@@ -46,15 +60,16 @@ export class GitHubServiceImpl implements GitHubService {
                 const data: T[] = await response.json()
                 results = results.concat(data)
 
-                if (data.length < 100) {
+                if (data.length < this.perPage) {
                     hasMorePages = false
                 }
 
                 currentPage++
             }
 
-            if (currentPage > MAX_PAGES) {
-                console.warn(`Reached maximum page limit of ${MAX_PAGES}. Results may be incomplete.`)
+            if (currentPage > this.maxPages) {
+                this.hasPaginationTruncated = true
+                console.warn(`Reached maximum page limit of ${this.maxPages}. Results may be incomplete.`)
             }
         } catch (error) {
             console.error('Erro ao buscar páginas:', error)

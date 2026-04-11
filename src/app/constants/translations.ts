@@ -28,6 +28,7 @@ interface Translation {
     statistics: string
     totalVisitors: string
     lastUsersAnalyzed: string
+    paginationTruncatedNotice: ({ maxPages, maxItems }: { maxPages: number, maxItems: number }) => string
     httpErrorMessage: {
         401: string[],
         403?: string[],
@@ -84,6 +85,7 @@ export const translations: Record<SupportedLanguages, Translation> = {
         statistics: "Estatísticas",
         totalVisitors: "Total de visitantes",
         lastUsersAnalyzed: "Últimos usuários analisados",
+        paginationTruncatedNotice: ({ maxPages, maxItems }) => `Os resultados podem estar incompletos. Limite de paginação atingido (${maxPages} páginas, até ${maxItems} itens).`,
         confirm: "Confirmar",
         cancel: "Cancelar",
         close: "Fechar",
@@ -148,6 +150,7 @@ export const translations: Record<SupportedLanguages, Translation> = {
         statistics: "Statistics",
         totalVisitors: "Total visitors",
         lastUsersAnalyzed: "Last analyzed users",
+        paginationTruncatedNotice: ({ maxPages, maxItems }) => `Results may be incomplete. Pagination limit reached (${maxPages} pages, up to ${maxItems} items).`,
         catchErrorMessage: {
             fetchOnePage: ({ currentPage, status, statusText }) =>
                 `Error fetching data on page ${currentPage}: ${status} - ${statusText}`,
@@ -206,6 +209,7 @@ export const translations: Record<SupportedLanguages, Translation> = {
         statistics: "统计",
         totalVisitors: "访客总数",
         lastUsersAnalyzed: "最近分析的用户",
+        paginationTruncatedNotice: ({ maxPages, maxItems }) => `结果可能不完整。已达到分页上限（${maxPages} 页，最多 ${maxItems} 条）。`,
         confirm: "确认",
         cancel: "取消",
         close: "关闭",
@@ -262,6 +266,7 @@ export const translations: Record<SupportedLanguages, Translation> = {
         statistics: "आंकड़े",
         totalVisitors: "कुल आगंतुक",
         lastUsersAnalyzed: "हाल ही में विश्लेषण किए गए उपयोगकर्ता",
+        paginationTruncatedNotice: ({ maxPages, maxItems }) => `परिणाम अधूरे हो सकते हैं। पेजिनेशन सीमा पूरी हो गई (${maxPages} पेज, अधिकतम ${maxItems} आइटम)।`,
         confirm: "पुष्टि करें",
         cancel: "रद्द करें",
         close: "बंद करें",
@@ -318,6 +323,7 @@ export const translations: Record<SupportedLanguages, Translation> = {
         statistics: "إحصائيات",
         totalVisitors: "إجمالي الزوار",
         lastUsersAnalyzed: "آخر المستخدمين الذين تم تحليلهم",
+        paginationTruncatedNotice: ({ maxPages, maxItems }) => `قد تكون النتائج غير مكتملة. تم الوصول إلى حد الصفحات (${maxPages} صفحات، حتى ${maxItems} عنصر).`,
         confirm: "تأكيد",
         cancel: "إلغاء",
         close: "إغلاق",
@@ -377,6 +383,7 @@ export const translations: Record<SupportedLanguages, Translation> = {
         statistics: "統計",
         totalVisitors: "総訪問者数",
         lastUsersAnalyzed: "最近分析されたユーザー",
+        paginationTruncatedNotice: ({ maxPages, maxItems }) => `結果が不完全な可能性があります。ページング上限に達しました（${maxPages}ページ、最大${maxItems}件）。`,
         catchErrorMessage: {
             fetchOnePage: ({ currentPage, status, statusText }) =>
                 `ページ ${currentPage} のデータ取得エラー: ${status} - ${statusText}`,

@@ -23,6 +23,7 @@ describe('translations contract', () => {
 
         const onePage = t.catchErrorMessage.fetchOnePage({ currentPage: 1, status: 500, statusText: 'Internal Error' })
         const manyPages = t.catchErrorMessage.fetchManyPages({ message: 'network' })
+        const truncated = t.paginationTruncatedNotice({ maxPages: 50, maxItems: 5000 })
         const nonFollowers = t.catchErrorMessage.fetchNonFollowers({ message: 'network' })
         const nonFollowing = t.catchErrorMessage.fetchNonFollowing({ message: 'network' })
         const unfollow = t.catchErrorMessage.unfollowUser({ username: 'octocat', message: 'forbidden' })
@@ -30,6 +31,7 @@ describe('translations contract', () => {
 
         expect(onePage).toContain('1')
         expect(manyPages.length).toBeGreaterThan(0)
+        expect(truncated.length).toBeGreaterThan(0)
         expect(nonFollowers.length).toBeGreaterThan(0)
         expect(nonFollowing.length).toBeGreaterThan(0)
         expect(unfollow).toContain('octocat')

@@ -135,6 +135,21 @@ describe('GitHubServiceImpl', () => {
         expect(result).toHaveLength(5000)
         expect(fetchMock).toHaveBeenCalledTimes(50)
         expect(console.warn).toHaveBeenCalledWith('Reached maximum page limit of 50. Results may be incomplete.')
+
+        const notice = service.consumePaginationTruncatedNotice('en')
+        expect(notice).toContain('Results may be incomplete.')
+        expect(service.consumePaginationTruncatedNotice('en')).toBeNull()
+    })
+
+    it('consumePaginationTruncatedNotice retorna null quando não há truncamento', async () => {
+        vi.stubGlobal(
+            'fetch',
+            vi.fn().mockResolvedValue(createMockResponse({ ok: true, status: 200, statusText: 'OK', jsonData: [] })),
+        )
+
+        await service.fetchAllPages('https://api.github.com/users/test/followers', 'token-123', 'en')
+
+        expect(service.consumePaginationTruncatedNotice('en')).toBeNull()
     })
 
     it('fetchAllPages trata erro genérico quando exceção não é Error', async () => {

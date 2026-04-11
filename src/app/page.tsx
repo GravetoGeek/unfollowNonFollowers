@@ -154,6 +154,12 @@ export default function HomePage() {
         }
         try {
             await handleSearchNonFollowers(username, apiKey, language)
+
+            const paginationNotice = gitHubService.consumePaginationTruncatedNotice(language)
+            if (paginationNotice) {
+                setModalMessage(paginationNotice)
+            }
+
             // Update stats after search
             void refreshStats({
                 method: 'POST',

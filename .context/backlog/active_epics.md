@@ -163,7 +163,7 @@ Backlog consolidado a partir da análise profunda de arquitetura, qualidade, seg
 - **Risco/Trade-off:** exige cuidado para manter semântica idêntica.
 
 #### Item P2.2.2 — Revisar limites de paginação e mensagens de truncamento
-- **Status:** ⏳ Pendente
+- **Status:** ✅ Concluído
 - **Complexidade:** Baixa
 - **Dependência:** Nenhuma
 - **Benefício:** transparência para usuário sobre resultados parciais.
