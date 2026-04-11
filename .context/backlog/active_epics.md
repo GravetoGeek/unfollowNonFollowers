@@ -107,7 +107,7 @@ Backlog consolidado a partir da análise profunda de arquitetura, qualidade, seg
 - **Risco/Trade-off:** risco de regressão visual se extração não for incremental.
 
 #### Item P1.2.2 — Extrair bloco de credenciais e ações de busca
-- **Status:** ⏳ Pendente
+- **Status:** ✅ Concluído
 - **Complexidade:** Média
 - **Dependência:** P1.2.1
 - **Benefício:** separa responsabilidades de formulário e listagem.
