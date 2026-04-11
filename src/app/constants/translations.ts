@@ -104,7 +104,7 @@ export const translations: Record<SupportedLanguages, Translation> = {
         httpErrorMessage: {
             401: [
                 "Para gerar seu token de acesso pessoal do Github -\n",
-                "1. Visite a seção <a href='https://github.com/settings/personal-access-tokens' target='_blank'>Tokens de Acesso Pessoal ↗</a> no Github\n",
+                "1. Visite a seção Tokens de Acesso Pessoal no Github: https://github.com/settings/personal-access-tokens\n",
                 "2. Clique em Gerar novo token\n",
                 "3. Preencha o nome do token, expiração e proprietário do recurso\n",
                 "4. Revise cuidadosamente e conceda as permissões necessárias ao seu token\n",
@@ -165,7 +165,7 @@ export const translations: Record<SupportedLanguages, Translation> = {
         httpErrorMessage: {
             401: [
                 "To generate your Github personal access token -\n",
-                "1. Visit the <a href='https://github.com/settings/personal-access-tokens' target='_blank'>Personal Access Tokens ↗</a> section on Github\n",
+                "1. Visit the Personal Access Tokens section on Github: https://github.com/settings/personal-access-tokens\n",
                 "2. Click on Generate new token\n",
                 "3. Fill in the token name, expiry and resource owner\n",
                 "4. Carefully review and grant the necessary fine grained permissions to your token\n",
@@ -226,7 +226,7 @@ export const translations: Record<SupportedLanguages, Translation> = {
         httpErrorMessage: {
             401: [
                 "要生成您的 Github 个人访问令牌 -\n",
-                "1. 访问 Github 上的 <a href='https://github.com/settings/personal-access-tokens' target='_blank'>个人访问令牌 ↗</a> 部分\n",
+                "1. 访问 Github 上的个人访问令牌部分: https://github.com/settings/personal-access-tokens\n",
                 "2. 点击生成新令牌\n",
                 "3. 填写令牌名称、到期时间和资源所有者\n",
                 "4. 仔细审查并授予令牌所需的细粒度权限\n",
@@ -282,7 +282,7 @@ export const translations: Record<SupportedLanguages, Translation> = {
         httpErrorMessage: {
             401: [
                 "अपने Github व्यक्तिगत पहुंच टोकन को उत्पन्न करने के लिए -\n",
-                "1. Github पर <a href='https://github.com/settings/personal-access-tokens' target='_blank'>व्यक्तिगत पहुंच टोकन ↗</a> अनुभाग पर जाएं\n",
+                "1. Github पर व्यक्तिगत पहुंच टोकन अनुभाग पर जाएं: https://github.com/settings/personal-access-tokens\n",
                 "2. नया टोकन उत्पन्न करने पर क्लिक करें\n",
                 "3. टोकन नाम, समाप्ति और संसाधन स्वामी भरें\n",
                 "4. अपने टोकन को आवश्यक बारीकियों से अनुमतियों को ध्यान से समीक्षा और अनुदान दें\n",
@@ -338,7 +338,7 @@ export const translations: Record<SupportedLanguages, Translation> = {
         httpErrorMessage: {
             401: [
                 "لإنشاء رمز الوصول الشخصي الخاص بك على Github -\n",
-                "1. انتقل إلى قسم <a href='https://github.com/settings/personal-access-tokens' target='_blank'>رموز الوصول الشخصية ↗</a> على Github\n",
+                "1. انتقل إلى قسم رموز الوصول الشخصية على Github: https://github.com/settings/personal-access-tokens\n",
                 "2. انقر على إنشاء رمز جديد\n",
                 "3. املأ اسم الرمز، وانتهاء الصلاحية ومالك المورد\n",
                 "4. راجع بعناية ومنح الأذونات الدقيقة اللازمة لرمزك\n",
@@ -394,7 +394,7 @@ export const translations: Record<SupportedLanguages, Translation> = {
         httpErrorMessage: {
             401: [
                 "Github の個人用アクセストークンを生成するには -\n",
-                "1. Github の <a href='https://github.com/settings/personal-access-tokens' target='_blank'>個人用アクセストークン ↗</a> セクションにアクセス\n",
+                "1. Github の個人用アクセストークンセクションにアクセス: https://github.com/settings/personal-access-tokens\n",
                 "2. 新しいトークンを生成するをクリック\n",
                 "3. トークン名、有効期限、リソース所有者を入力\n",
                 "4. トークンに必要な詳細な権限を注意深く確認し、付与\n",

@@ -1,6 +1,5 @@
 "use client"
 
-import parse from 'html-react-parser'
 import { useEffect, useMemo, useState } from 'react'
 import ConfirmationModal from './components/Modal/ConfirmationModal'
 import Modal from './components/Modal/Modal'
@@ -221,7 +220,7 @@ export default function HomePage() {
                 {/* Modal de mensagem */}
                 {modalMessage && (
                     <Modal
-                        message={parse(modalMessage)}
+                        message={modalMessage}
                         onClose={() => setModalMessage(null)}
                         language={language}
                     />
