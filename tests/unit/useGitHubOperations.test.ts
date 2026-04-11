@@ -106,4 +106,62 @@ describe('useGitHubOperations', () => {
             expect(result.current.isSearching).toBe(false)
         })
     })
+
+    it('executa follow em lote respeitando todos os usuários carregados', async () => {
+        const service = createServiceMock()
+        const users = Array.from({ length: 7 }, (_, index) => user(`f${index + 1}`))
+        vi.mocked(service.fetchNonFollowers).mockResolvedValue([])
+        vi.mocked(service.fetchNonFollowing).mockResolvedValue(users)
+        vi.mocked(service.followUser).mockResolvedValue(true)
+
+        const { result } = renderHook(() => useGitHubOperations(service))
+
+        await act(async () => {
+            await result.current.handleSearchNonFollowers('octocat', 'token-123', 'en')
+        })
+
+        await waitFor(() => {
+            expect(result.current.nonFollowing).toHaveLength(7)
+        })
+
+        await act(async () => {
+            await result.current.handleFollowAll('token-123', 'en')
+        })
+
+        expect(service.followUser).toHaveBeenCalledTimes(7)
+    })
+
+    it('retorna erro genérico ao receber exceção não-Error em unfollow', async () => {
+        const service = createServiceMock()
+        vi.mocked(service.fetchNonFollowers).mockResolvedValue([user('alice')])
+        vi.mocked(service.fetchNonFollowing).mockResolvedValue([])
+        vi.mocked(service.unfollowUser).mockRejectedValue('unexpected')
+
+        const { result } = renderHook(() => useGitHubOperations(service))
+
+        await act(async () => {
+            await result.current.handleSearchNonFollowers('octocat', 'token-123', 'en')
+        })
+
+        await expect(result.current.handleUnfollow('alice', 'token-123', 'en')).rejects.toThrow(
+            'Failed to unfollow the user.',
+        )
+    })
+
+    it('retorna erro genérico ao receber exceção não-Error em follow', async () => {
+        const service = createServiceMock()
+        vi.mocked(service.fetchNonFollowers).mockResolvedValue([])
+        vi.mocked(service.fetchNonFollowing).mockResolvedValue([user('bob')])
+        vi.mocked(service.followUser).mockRejectedValue('unexpected')
+
+        const { result } = renderHook(() => useGitHubOperations(service))
+
+        await act(async () => {
+            await result.current.handleSearchNonFollowers('octocat', 'token-123', 'en')
+        })
+
+        await expect(result.current.handleFollow('bob', 'token-123', 'en')).rejects.toThrow(
+            'Failed to follow the user.',
+        )
+    })
 })
