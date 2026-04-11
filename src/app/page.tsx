@@ -9,6 +9,7 @@ import { SupportedLanguages, translations } from './constants/translations'
 import { useGitHubOperations } from './hooks/useGitHubOperations'
 import styles from './page.module.css'
 import { GitHubServiceImpl } from './services/GitHubService'
+import { DEFAULT_STATS, StatsData, toStatsResponse } from './utils/statsContract'
 
 export default function HomePage() {
     const [username, setUsername] = useState("");
@@ -22,7 +23,7 @@ export default function HomePage() {
     const [confirmationMessage, setConfirmationMessage] = useState<string | null>(null);
     const [onConfirm, setOnConfirm] = useState<(() => Promise<void>) | null>(null);
     const [theme, setTheme] = useState<"light" | "dark">("light")
-    const [stats, setStats] = useState<{ visitors: number, lastUsers: string[] }>({ visitors: 0, lastUsers: [] })
+    const [stats, setStats] = useState<StatsData>(DEFAULT_STATS)
 
     const gitHubService = useMemo(() => new GitHubServiceImpl(), [])
     const githubOperations = useGitHubOperations(gitHubService)
@@ -61,6 +62,17 @@ export default function HomePage() {
         document.documentElement.setAttribute("data-theme", newTheme)
     }
 
+    const refreshStats=async (requestInit?: RequestInit) => {
+        try {
+            const response=await fetch('/api/stats',requestInit)
+            const data=await response.json() as unknown
+            const parsed=toStatsResponse(data)
+            setStats({visitors: parsed.visitors,lastUsers: parsed.lastUsers})
+        } catch {
+            setStats(DEFAULT_STATS)
+        }
+    }
+
     // Carregar o nome do usuário e a chave da API do localStorage ao inicializar
     useEffect(() => {
         const storedUsername = localStorage.getItem("githubUsername")
@@ -73,10 +85,7 @@ export default function HomePage() {
         }
 
         // Fetch stats
-        fetch('/api/stats')
-            .then(res => res.json())
-            .then(data => setStats(data))
-            .catch(console.error)
+        void refreshStats()
     }, [])
 
     // Atualizar o localStorage sempre que o nome do usuário ou a chave da API mudar
@@ -115,14 +124,11 @@ export default function HomePage() {
         try {
             await handleSearchNonFollowers(username, apiKey, language)
             // Update stats after search
-            fetch('/api/stats', {
+            void refreshStats({
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username })
             })
-                .then(res => res.json())
-                .then(data => setStats(data))
-                .catch(console.error)
         } catch (error) {
             setModalMessage(error instanceof Error ? error.message : "An error occurred")
         }
