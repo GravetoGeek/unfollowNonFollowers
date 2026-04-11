@@ -1,5 +1,6 @@
 "use client"
 
+import Image from 'next/image'
 import { useEffect, useMemo, useState } from 'react'
 import ConfirmationModal from './components/Modal/ConfirmationModal'
 import Modal from './components/Modal/Modal'
@@ -465,11 +466,11 @@ export default function HomePage() {
                                         className={styles.userTag}
                                         title={`View ${user} on GitHub`}
                                     >
-                                        <img
-                                            src={`https://github.com/${user}.png?size=20`}
-                                            alt=""
-                                            width="16"
-                                            height="16"
+                                        <Image
+                                            src={`https://avatars.githubusercontent.com/${user}?size=20`}
+                                            alt={`${user} avatar`}
+                                            width={16}
+                                            height={16}
                                             className={styles.miniAvatar}
                                         />
                                         {user}
