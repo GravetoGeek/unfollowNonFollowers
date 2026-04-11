@@ -5,7 +5,7 @@ Aplicação Next.js para comparar seguidores/seguidos do GitHub, com ações de 
 ## Arquitetura atual
 
 - Trilha ativa: `src/app/*`
-- Pastas em transição com placeholders: `src/components/*`, `src/lib/*`, `src/services/*`, `src/types/*`
+- Pastas de transição legada: `src/components/*`, `src/lib/*`, `src/services/*`, `src/types/*`
 - Não mover código da trilha ativa para a trilha em transição sem decisão explícita.
 
 ## Requisitos
@@ -36,6 +36,8 @@ npm run test:e2e
 npm run test:e2e:playwright
 npm run build
 ```
+
+- A suíte unitária está com gate de cobertura 100% para os módulos ativos em `vitest.config.ts`.
 
 ## Segurança do token
 

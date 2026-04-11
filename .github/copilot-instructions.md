@@ -4,7 +4,7 @@
 
 - Este projeto está em transição arquitetural.
 - A implementação ativa e funcional está em `src/app/*`.
-- Existem placeholders vazios em `src/components/*`, `src/lib/*`, `src/services/*` e `src/types/*`.
+- Existem pastas legadas de transição em `src/components/*`, `src/lib/*`, `src/services/*` e `src/types/*`.
 
 ## Regras de geração de código
 
@@ -28,4 +28,5 @@
 ## Validação sugerida
 
 - Rodar `npm run lint` após mudanças.
+- Rodar `npm run test:unit` para validar o gate de cobertura.
 - Rodar `npm run build` quando houver mudança estrutural.
