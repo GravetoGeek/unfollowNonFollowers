@@ -97,6 +97,58 @@ describe('GitHubServiceImpl', () => {
             .toThrow('Internal server error. Please try again later.')
     })
 
+    it('fetchNonFollowers retorna apenas quem não segue de volta', async () => {
+        const fetchMock = vi.fn()
+            .mockResolvedValueOnce(
+                createMockResponse({
+                    ok: true,
+                    status: 200,
+                    statusText: 'OK',
+                    jsonData: [{ login: 'alice' }, { login: 'bob' }, { login: 'carol' }],
+                }),
+            )
+            .mockResolvedValueOnce(
+                createMockResponse({
+                    ok: true,
+                    status: 200,
+                    statusText: 'OK',
+                    jsonData: [{ login: 'alice' }, { login: 'carol' }],
+                }),
+            )
+
+        vi.stubGlobal('fetch', fetchMock)
+
+        const result = await service.fetchNonFollowers('test-user', 'token-123', 'en')
+
+        expect(result).toEqual([{ login: 'bob' }])
+    })
+
+    it('fetchNonFollowing retorna apenas quem eu não sigo', async () => {
+        const fetchMock = vi.fn()
+            .mockResolvedValueOnce(
+                createMockResponse({
+                    ok: true,
+                    status: 200,
+                    statusText: 'OK',
+                    jsonData: [{ login: 'alice' }, { login: 'bob' }, { login: 'carol' }],
+                }),
+            )
+            .mockResolvedValueOnce(
+                createMockResponse({
+                    ok: true,
+                    status: 200,
+                    statusText: 'OK',
+                    jsonData: [{ login: 'alice' }, { login: 'carol' }],
+                }),
+            )
+
+        vi.stubGlobal('fetch', fetchMock)
+
+        const result = await service.fetchNonFollowing('test-user', 'token-123', 'en')
+
+        expect(result).toEqual([{ login: 'bob' }])
+    })
+
     it('unfollowUser retorna true em sucesso', async () => {
         const fetchMock = vi.fn().mockResolvedValue(createMockResponse({ ok: true, status: 204, statusText: 'No Content' }))
         vi.stubGlobal('fetch', fetchMock)
