@@ -18,6 +18,15 @@ const createMockResponse = ({ ok, status, statusText, jsonData = [] }: MockRespo
     } as unknown as Response
 }
 
+const createMockResponseWithJsonError = ({ ok, status, statusText }: Omit<MockResponseOptions, 'jsonData'>): Response => {
+    return {
+        ok,
+        status,
+        statusText,
+        json: vi.fn().mockRejectedValue(new Error('invalid-json')),
+    } as unknown as Response
+}
+
 describe('GitHubServiceImpl', () => {
     const service = new GitHubServiceImpl()
 
@@ -134,6 +143,29 @@ describe('GitHubServiceImpl', () => {
         await expect(service.fetchAllPages('https://api.github.com/users/test/followers', 'token-123', 'en'))
             .rejects
             .toThrow('Failed to fetch data from multiple pages.')
+    })
+
+    it('executa callback de timeout configurado por withTimeout', async () => {
+        const setTimeoutMock = vi.spyOn(globalThis, 'setTimeout').mockImplementation(((callback: TimerHandler) => {
+            if (typeof callback === 'function') {
+                callback()
+            }
+
+            return 1 as unknown as ReturnType<typeof setTimeout>
+        }) as typeof setTimeout)
+
+        const clearTimeoutMock = vi.spyOn(globalThis, 'clearTimeout').mockImplementation(() => undefined)
+
+        vi.stubGlobal(
+            'fetch',
+            vi.fn().mockResolvedValue(createMockResponse({ ok: true, status: 200, statusText: 'OK', jsonData: [] })),
+        )
+
+        const result = await service.fetchAllPages('https://api.github.com/users/test/followers', 'token-123', 'en')
+
+        expect(result).toEqual([])
+        expect(setTimeoutMock).toHaveBeenCalled()
+        expect(clearTimeoutMock).toHaveBeenCalled()
     })
 
     it('fetchNonFollowers retorna apenas quem não segue de volta', async () => {
@@ -353,6 +385,23 @@ describe('GitHubServiceImpl', () => {
                     status: 403,
                     statusText: 'Forbidden',
                     jsonData: { message: 'forbidden by policy' },
+                }),
+            ),
+        )
+
+        await expect(service.followUser('octocat', 'token-123', 'en'))
+            .rejects
+            .toThrow('Failed to follow octocat: Access denied (403).')
+    })
+
+    it('followUser trata erro 403 quando json da resposta falha', async () => {
+        vi.stubGlobal(
+            'fetch',
+            vi.fn().mockResolvedValue(
+                createMockResponseWithJsonError({
+                    ok: false,
+                    status: 403,
+                    statusText: 'Forbidden',
                 }),
             ),
         )

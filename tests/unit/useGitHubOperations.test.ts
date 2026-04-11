@@ -16,6 +16,15 @@ const createServiceMock = (): GitHubService => ({
 })
 
 describe('useGitHubOperations', () => {
+    const deferred = <T>() => {
+        let resolve!: (value: T | PromiseLike<T>) => void
+        const promise = new Promise<T>((res) => {
+            resolve = res
+        })
+
+        return { promise, resolve }
+    }
+
     beforeEach(() => {
         vi.restoreAllMocks()
         vi.spyOn(console, 'error').mockImplementation(() => undefined)
@@ -229,5 +238,69 @@ describe('useGitHubOperations', () => {
         })
 
         await expect(result.current.handleFollow('bob', 'token-123', 'en')).rejects.toThrow('api exploded')
+    })
+
+    it('expõe estado de unfollow em andamento pelos seletores', async () => {
+        const service = createServiceMock()
+        vi.mocked(service.fetchNonFollowers).mockResolvedValue([user('alice')])
+        vi.mocked(service.fetchNonFollowing).mockResolvedValue([])
+
+        const unfollowDeferred = deferred<boolean>()
+        vi.mocked(service.unfollowUser).mockReturnValue(unfollowDeferred.promise)
+
+        const { result } = renderHook(() => useGitHubOperations(service))
+
+        await act(async () => {
+            await result.current.handleSearchNonFollowers('octocat', 'token-123', 'en')
+        })
+
+        const pendingCall = act(async () => {
+            void result.current.handleUnfollow('alice', 'token-123', 'en')
+            await Promise.resolve()
+        })
+
+        await pendingCall
+        expect(result.current.isUnfollowingAny).toBe(true)
+        expect(result.current.isUnfollowingUser('alice')).toBe(true)
+
+        await act(async () => {
+            unfollowDeferred.resolve(true)
+            await Promise.resolve()
+        })
+
+        expect(result.current.isUnfollowingAny).toBe(false)
+        expect(result.current.isUnfollowingUser('alice')).toBe(false)
+    })
+
+    it('expõe estado de follow em andamento pelos seletores', async () => {
+        const service = createServiceMock()
+        vi.mocked(service.fetchNonFollowers).mockResolvedValue([])
+        vi.mocked(service.fetchNonFollowing).mockResolvedValue([user('bob')])
+
+        const followDeferred = deferred<boolean>()
+        vi.mocked(service.followUser).mockReturnValue(followDeferred.promise)
+
+        const { result } = renderHook(() => useGitHubOperations(service))
+
+        await act(async () => {
+            await result.current.handleSearchNonFollowers('octocat', 'token-123', 'en')
+        })
+
+        const pendingCall = act(async () => {
+            void result.current.handleFollow('bob', 'token-123', 'en')
+            await Promise.resolve()
+        })
+
+        await pendingCall
+        expect(result.current.isFollowingAny).toBe(true)
+        expect(result.current.isFollowingUser('bob')).toBe(true)
+
+        await act(async () => {
+            followDeferred.resolve(true)
+            await Promise.resolve()
+        })
+
+        expect(result.current.isFollowingAny).toBe(false)
+        expect(result.current.isFollowingUser('bob')).toBe(false)
     })
 })
