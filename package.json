@@ -7,7 +7,7 @@
         "dev:test": "next dev --turbopack --port 4173",
         "build": "next build",
         "start": "next start",
-        "lint": "next lint",
+        "lint": "eslint .",
         "test": "npm run test:unit && npm run test:e2e && npm run test:e2e:playwright",
         "test:unit": "vitest run tests/unit --coverage",
         "test:e2e": "vitest run tests/e2e",
@@ -31,7 +31,7 @@
         "@types/react-dom": "^19",
         "@vitest/coverage-v8": "^4.1.4",
         "eslint": "^9",
-        "eslint-config-next": "15.2.2",
+        "eslint-config-next": "^16.1.2",
         "jsdom": "^29.0.2",
         "typescript": "^5",
         "vitest": "^4.1.4"
