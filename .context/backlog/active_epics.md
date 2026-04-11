@@ -100,7 +100,7 @@ Backlog consolidado a partir da análise profunda de arquitetura, qualidade, seg
 **Problema-raiz:** `page.tsx` concentra UI, estado, side-effects e integração de API em arquivo único grande.
 
 #### Item P1.2.1 — Extrair bloco de controles superiores (tema/idioma/variante)
-- **Status:** ⏳ Pendente
+- **Status:** ✅ Concluído
 - **Complexidade:** Média
 - **Dependência:** Nenhuma
 - **Benefício:** melhora legibilidade e testabilidade.
